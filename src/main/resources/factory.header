@@ -1,5 +1,6 @@
-package ${package};
+package ${factoryPackage};
 
+import ${package}.*;
 import ${package}.impl.*;
 
 import java.util.Collection;

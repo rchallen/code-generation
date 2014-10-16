@@ -4,6 +4,7 @@ import static org.protege.owl.codegeneration.SubstitutionVariable.CAPITALIZED_PR
 import static org.protege.owl.codegeneration.SubstitutionVariable.CLASS_IRI;
 import static org.protege.owl.codegeneration.SubstitutionVariable.DATE;
 import static org.protege.owl.codegeneration.SubstitutionVariable.FACTORY_CLASS_NAME;
+import static org.protege.owl.codegeneration.SubstitutionVariable.FACTORY_PACKAGE_NAME;
 import static org.protege.owl.codegeneration.SubstitutionVariable.IMPLEMENTATION_NAME;
 import static org.protege.owl.codegeneration.SubstitutionVariable.INTERFACE_LIST;
 import static org.protege.owl.codegeneration.SubstitutionVariable.INTERFACE_NAME;
@@ -126,12 +127,7 @@ public class DefaultWorker implements Worker {
     	return getInterfaceFile(Constants.VOCABULARY_CLASS_NAME);
     }
     
-    public File getFactoryFile() {
-    	return getInterfaceFile(options.getFactoryClassName());
-    }
-
-
-	public String getTemplate(CodeGenerationPhase phase, OWLClass owlClass, Object owlProperty) {
+    public String getTemplate(CodeGenerationPhase phase, OWLClass owlClass, Object owlProperty) {
     	String resource = "/" + phase.getTemplateName();
 		String template = templateMap.get(phase);
 		if (template == null) {
@@ -201,6 +197,7 @@ public class DefaultWorker implements Worker {
         substitutions.put(DATE, new Date().toString());
         substitutions.put(USER, System.getProperty("user.name"));
         substitutions.put(FACTORY_CLASS_NAME, options.getFactoryClassName());
+        substitutions.put(FACTORY_PACKAGE_NAME, options.getFactoryPackageName());
     }
 
 	private void configureClassSubstitutions(Map<SubstitutionVariable, String> substitutions, 
@@ -256,7 +253,10 @@ public class DefaultWorker implements Worker {
 	    return new File(options.getOutputFolder(), pack + name + ".java");
 	}
 	
-
+	public File getFactoryFile() {
+	    return new File(options.getOutputFolder(),
+	    		options.getFactoryFqn().replace('.', '/')+".java");
+	}
 
 	private String getSuperInterfaceList(OWLClass owlClass) {
 	    String base = getBaseInterface(owlClass);

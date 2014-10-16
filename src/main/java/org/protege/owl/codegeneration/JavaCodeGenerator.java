@@ -174,6 +174,7 @@ public class JavaCodeGenerator {
         FileWriter factoryFileWriter = null;
         PrintWriter factoryPrintWriter = null;
         File factoryFile = worker.getFactoryFile();
+        factoryFile.getParentFile().mkdirs();
         factoryFileWriter = new FileWriter(factoryFile);
         factoryPrintWriter = new PrintWriter(factoryFileWriter);
         

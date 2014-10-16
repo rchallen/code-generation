@@ -59,8 +59,15 @@ public class CodeGenerationOptions {
 		this.useReasoner = useReasoner;
 	}
 
+    public String getFactoryPackageName() {
+    	if (factoryClassName.lastIndexOf('.') < 0) return getPackage();
+    	return getPackage()+"."+factoryClassName.substring(0,factoryClassName.lastIndexOf('.'));
+    }
+    
     public String getFactoryClassName() {
-        return factoryClassName;
+    	//Allow . in factory name to 
+    	if (factoryClassName.lastIndexOf('.') < 0) return factoryClassName;
+        return factoryClassName.substring(factoryClassName.lastIndexOf('.')+1);
     }
 
     public File getOutputFolder() {
@@ -73,6 +80,12 @@ public class CodeGenerationOptions {
     
     public boolean useReasoner() {
 		return useReasoner;
+	}
+
+	public String getFactoryFqn() {
+		// Bit of a hack to allow subpackages to be specified as part of the 
+		// factory name
+		return getPackage()+"."+factoryClassName;
 	}
 
 }

@@ -53,18 +53,29 @@ public class JavaPropertyDeclarationCache {
 		generateChildren(thing, explored);
 	}
 	
-	private void generateChildren(OWLClass parent, Set<OWLClass> explored) {
+	/*
+	 * Rob Challen 2014-10-16
+	 * Issues discovered with models that have multiple inheritance.
+	 * Turns out previous method of detecting whether a class visited
+	 * before prevents inheritance of properties from 2 paretn classes
+	 * and you only got the properties from one parent
+	 * Modifications made to allow multiple inheritance to feed through to model
+	 * by altering the .
+	 */
+	private void generateChildren(OWLClass parent, Set<OWLClass> ancestors) {
 		Map<OWLEntity, JavaPropertyDeclarations> parentProperty2DeclarationMap = class2Property2DeclarationMap.get(parent);
 		if (parentProperty2DeclarationMap == null) {
 			parentProperty2DeclarationMap = Collections.emptyMap();
 		}
 		for (OWLClass child : inference.getSubClasses(parent)) {
-			if (explored.contains(child)) {
+			if (ancestors.contains(child)) {
 				continue;
 			}
 			copyDeclarations(parentProperty2DeclarationMap, parent, child);
-			explored.add(child);
-			generateChildren(child, explored);
+			ancestors.add(child);
+			HashSet<OWLClass> copy = new HashSet<OWLClass>();
+			copy.addAll(ancestors);
+			generateChildren(child, copy);
 		}
 		
 	}
