@@ -16,6 +16,7 @@ import org.protege.owl.codegeneration.inference.CodeGenerationInference;
 import org.protege.owl.codegeneration.inference.ReasonerBasedInference;
 import org.protege.owl.codegeneration.inference.SimpleInference;
 import org.protege.owl.codegeneration.names.IriNames;
+import org.semanticweb.HermiT.Reasoner.ReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -146,9 +147,10 @@ extends AbstractMojo
 			OWLReasonerFactory rFactory = (OWLReasonerFactory) Class.forName(reasonerFactoryName).newInstance();
 			OWLReasoner reasoner = rFactory.createNonBufferingReasoner(owlOntology);
 			inference = new ReasonerBasedInference(owlOntology, reasoner);
-		}
-		else {
-			inference = new SimpleInference(owlOntology);
+		} else {
+			OWLReasonerFactory rFactory = new ReasonerFactory();
+			OWLReasoner reasoner = rFactory.createReasoner(owlOntology);
+			inference = new ReasonerBasedInference(owlOntology, reasoner);
 		}
 		// inference.preCompute();
 		DefaultWorker.generateCode(owlOntology, options, new IriNames(owlOntology, options), inference);

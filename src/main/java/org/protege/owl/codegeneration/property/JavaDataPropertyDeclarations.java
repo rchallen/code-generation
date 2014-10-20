@@ -51,15 +51,21 @@ public class JavaDataPropertyDeclarations implements JavaPropertyDeclarations {
         substitutions.put(PROPERTY_RANGE, getDataPropertyRange());
 	}
 	
+	public boolean isCollection() {
+		return !inference.isSingleton(owlClass, property);
+	}
 
 	private String getDataPropertyRange() {
-	    OWLDatatype  dt = inference.getRange(property);
+	    OWLDatatype  dt = inference.getRange(owlClass, property);
 	    return getDataPropertyJavaName(dt);
 	}
 
 	private String getDataPropertyRangeForClass() {
 	    OWLDatatype  dt = inference.getRange(owlClass, property);
-	    return getDataPropertyJavaName(dt);
+	    return 
+	    		(isCollection() ? "Collection<? extends " : "") +
+	    		getDataPropertyJavaName(dt) +
+	    		(isCollection() ? ">" : "");
 	}
 
 	/**

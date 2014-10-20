@@ -40,5 +40,5 @@ public interface Worker {
 			                    OWLClass owlClass,
 			                    OWLEntity owlProperty);
 	
-	String getTemplate(CodeGenerationPhase phase, OWLClass owlClass, Object owlProperty);
+	String getTemplate(CodeGenerationPhase phase, OWLClass owlClass, OWLEntity owlProperty);
 }

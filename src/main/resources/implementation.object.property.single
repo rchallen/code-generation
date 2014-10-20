@@ -4,13 +4,15 @@
      */
      
     public ${propertyRangeForClass} get${OwlProperty}() {
-        return getDelegate().getPropertyValues(getOwlIndividual(),
+        Collection<? extends ${propertyRangeImplementation}> tmp = 
+        				getDelegate().getPropertyValues(getOwlIndividual(),
                                                Vocabulary.${VocabProperty},
                                                ${propertyRangeImplementation}.class);
+        return tmp.isEmpty() ? null : (${propertyRangeForClass}) tmp.iterator().next();
     }
 
     public boolean has${OwlProperty}() {
-	   return !get${OwlProperty}().isEmpty();
+	   return !(get${OwlProperty}() == null);
     }
 
     public void add${OwlProperty}(${propertyRange} new${OwlProperty}) {

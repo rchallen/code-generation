@@ -4,9 +4,9 @@
      */
      
     /**
-     * Gets all property values for the ${owlProperty} property.<p>
+     * Gets the property value for the ${owlProperty} property.<p>
      * ${javadoc}
-     * @returns a collection of values for the ${owlProperty} property.
+     * @returns a ${propertyRangeForInterface} for the ${owlProperty} property.
      */
     ${propertyRangeForInterface} get${OwlProperty}();
 

@@ -148,7 +148,7 @@ public class SimpleInference implements CodeGenerationInference {
 		if (domains != null) {
 			for (OWLEntity property : domains) {
 				if (property instanceof OWLObjectProperty) {
-					declarations.add(new JavaObjectPropertyDeclarations(this, names, (OWLObjectProperty) property));
+					declarations.add(new JavaObjectPropertyDeclarations(this, names, cls, (OWLObjectProperty) property));
 				}
 				else {
 					declarations.add(new JavaDataPropertyDeclarations(this, cls, (OWLDataProperty) property));
@@ -337,6 +337,26 @@ public class SimpleInference implements CodeGenerationInference {
 	    for (OWLClass newSuperClass : newSuperClasses) {
 	        addIndirectSuperClasses(superClasses, newSuperClass);
 	    }
+	}
+
+	@Override
+	public boolean isNullable(OWLClass owlClass, OWLObjectProperty p) {
+		return true;
+	}
+
+	@Override
+	public boolean isNullable(OWLClass owlClass, OWLDataProperty p) {
+		return true;
+	}
+
+	@Override
+	public boolean isSingleton(OWLClass owlClass, OWLObjectProperty p) {
+		return false;
+	}
+
+	@Override
+	public boolean isSingleton(OWLClass owlClass, OWLDataProperty p) {
+		return false;
 	}
 	
 }

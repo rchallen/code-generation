@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -42,7 +43,7 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 public class DefaultWorker implements Worker {
-	private EnumMap<CodeGenerationPhase, String> templateMap = new EnumMap<CodeGenerationPhase, String>(CodeGenerationPhase.class);
+	private HashMap<String, String> templateMap = new HashMap<String, String>();
 	private OWLOntology owlOntology;
 	private CodeGenerationOptions options;
 	private CodeGenerationNames names;
@@ -127,9 +128,14 @@ public class DefaultWorker implements Worker {
     	return getInterfaceFile(Constants.VOCABULARY_CLASS_NAME);
     }
     
-    public String getTemplate(CodeGenerationPhase phase, OWLClass owlClass, Object owlProperty) {
+    public String getTemplate(CodeGenerationPhase phase, OWLClass owlClass, OWLEntity owlProperty) {
+    	
     	String resource = "/" + phase.getTemplateName();
-		String template = templateMap.get(phase);
+    	if (owlClass != null && owlProperty != null) {
+    		resource = resource + ( propertyDeclarations.get(owlClass, owlProperty).isCollection() ? "" : ".single" );
+    	}
+		
+    	String template = templateMap.get(resource);
 		if (template == null) {
 			try {
 				URL u = CodeGenerationOptions.class.getResource(resource);
@@ -145,7 +151,7 @@ public class DefaultWorker implements Worker {
 					buffer.append(characters, 0, charsRead);
 				}
 				template = buffer.toString();
-				templateMap.put(phase, template);
+				templateMap.put(resource, template);
 				reader.close();
 			}
 			catch (IOException e) {

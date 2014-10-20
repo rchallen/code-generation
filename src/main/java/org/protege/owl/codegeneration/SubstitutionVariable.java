@@ -18,6 +18,7 @@ public enum SubstitutionVariable {
 	UPPERCASE_PROPERTY("OWLProperty"),
 	VOCABULARY_PROPERTY("VocabProperty"),
 	PROPERTY_RANGE("propertyRange"),
+	PROPERTY_RANGE_FOR_INTERFACE("propertyRangeForInterface"),
 	PROPERTY_RANGE_FOR_CLASS("propertyRangeForClass"),
 	PROPERTY_RANGE_IMPLEMENTATION("propertyRangeImplementation"),
 	JAVADOC("javadoc"),

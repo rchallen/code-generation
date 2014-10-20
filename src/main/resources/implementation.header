@@ -18,6 +18,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * Source Class: ${implementationName} <br>
  * @version generated on ${date} by ${user}
  */
+@SuppressWarnings("unused")
 public class ${implementationName} extends WrappedIndividualImpl implements ${interfaceName} {
 
     public ${implementationName}(CodeGenerationInference inference, IRI iri) {

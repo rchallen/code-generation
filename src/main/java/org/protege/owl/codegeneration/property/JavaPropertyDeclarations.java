@@ -32,5 +32,7 @@ public interface JavaPropertyDeclarations {
 	
 	JavaPropertyDeclarations specializeTo(OWLClass subclass);
 	
+	public boolean isCollection();
+	
 	void configureSubstitutions(Map<SubstitutionVariable, String> substitutions);
 }

@@ -8,6 +8,7 @@ public class Constants {
     public static final String CODE_GENERATION_NS = "http://protege.org/code";
     public static final OWLAnnotationProperty JAVADOC = OWLManager.getOWLDataFactory().getOWLAnnotationProperty(IRI.create(CODE_GENERATION_NS + "#javadoc"));
     public static final OWLAnnotationProperty JAVANAME = OWLManager.getOWLDataFactory().getOWLAnnotationProperty(IRI.create(CODE_GENERATION_NS + "#javaname"));
+    public static final OWLAnnotationProperty IGNORE = OWLManager.getOWLDataFactory().getOWLAnnotationProperty(IRI.create(CODE_GENERATION_NS + "#ignore"));
 	
     
 	public static final String UKNOWN_CODE_GENERATED_INTERFACE = "WrappedIndividual";
