@@ -55,4 +55,6 @@ public interface CodeGenerationInference {
 	
     Collection<OWLLiteral> getPropertyValues(OWLNamedIndividual i, OWLDataProperty p);
 
+	Collection<OWLClass> getAllOwlClasses();
+
 }

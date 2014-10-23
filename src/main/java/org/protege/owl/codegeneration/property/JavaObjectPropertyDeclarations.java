@@ -12,7 +12,6 @@ import org.protege.owl.codegeneration.SubstitutionVariable;
 import org.protege.owl.codegeneration.inference.CodeGenerationInference;
 import org.protege.owl.codegeneration.names.CodeGenerationNames;
 import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 
 /**
@@ -69,7 +68,7 @@ public class JavaObjectPropertyDeclarations implements JavaPropertyDeclarations 
 	
 	private String getObjectPropertyRange(boolean isInterface) {
 		OWLClass range = inference.getRange(property);
-		if (range == null || !inference.getOwlClasses().contains(range)) {
+		if (range == null || !inference.getAllOwlClasses().contains(range)) {
 			return isInterface ? Constants.UKNOWN_CODE_GENERATED_INTERFACE : Constants.ABSTRACT_CODE_GENERATOR_INDIVIDUAL_CLASS;
 		}
 		return 

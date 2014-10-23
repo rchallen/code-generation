@@ -7,6 +7,9 @@ import org.protege.owl.codegeneration.WrappedIndividual;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 /**
  * ${javadoc}
  * <p>

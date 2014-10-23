@@ -358,5 +358,11 @@ public class SimpleInference implements CodeGenerationInference {
 	public boolean isSingleton(OWLClass owlClass, OWLDataProperty p) {
 		return false;
 	}
+
+	@Override
+	public Collection<OWLClass> getAllOwlClasses() {
+		//TODO: change to allow filtering based on java:ignore
+		return getOwlClasses();
+	}
 	
 }

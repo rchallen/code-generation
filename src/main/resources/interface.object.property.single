@@ -8,6 +8,7 @@
      * ${javadoc}
      * @returns a ${propertyRangeForInterface} for the ${owlProperty} property.
      */
+    ${atNotNull}
     ${propertyRangeForInterface} get${OwlProperty}();
 
     /**

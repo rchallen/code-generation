@@ -2,7 +2,8 @@
     /* ***************************************************
      * Data Property ${propertyIri}
      */
-     
+    
+    ${atNotNull} 
     public ${propertyRangeForClass} get${OwlProperty}() {
     	return getDelegate().getPropertyValues(getOwlIndividual(), Vocabulary.${VocabProperty}, ${propertyRange}.class);
     }

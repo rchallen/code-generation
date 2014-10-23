@@ -23,7 +23,8 @@ public enum SubstitutionVariable {
 	PROPERTY_RANGE_IMPLEMENTATION("propertyRangeImplementation"),
 	JAVADOC("javadoc"),
 	DATE("date"),
-	USER("user");
+	USER("user"),
+	NOT_NULL_ANNOT("atNotNull");
 	
 	private String name;
 	

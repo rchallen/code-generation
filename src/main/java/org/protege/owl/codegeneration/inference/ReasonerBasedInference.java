@@ -1,5 +1,6 @@
 package org.protege.owl.codegeneration.inference;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,10 +19,8 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationObjectVisitor;
-import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationValue;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -29,12 +28,10 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLEntityVisitor;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLProperty;
 import org.semanticweb.owlapi.model.OWLSubAnnotationPropertyOfAxiom;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
@@ -72,14 +69,22 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 		reasoner.flush();
 	}
 
-	@Override
-	public Collection<OWLClass> getOwlClasses() {
+	public Collection<OWLClass> getAllOwlClasses() {
 		if (allClasses == null) {
 			allClasses = new HashSet<OWLClass>(ontology.getClassesInSignature());
 			allClasses.removeAll(reasoner.getUnsatisfiableClasses().getEntities());
 			allClasses.removeAll(reasoner.getEquivalentClasses(factory.getOWLThing()).getEntities());
 		}
 		return allClasses;
+	}
+	
+	@Override
+	public Collection<OWLClass> getOwlClasses() {
+		ArrayList<OWLClass> out = new ArrayList<OWLClass>(); 
+		for (OWLClass owlClass: getAllOwlClasses()) {
+			if (!ignore(owlClass)) out.add(owlClass);
+		}
+		return out;
 	}
 
 	public boolean isNullable(OWLClass owlClass, OWLDataProperty owlProperty) {
@@ -121,8 +126,8 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 		public void visit(OWLAnnotationPropertyRangeAxiom axiom) {}
 		@Override
 		public void visit(OWLSubAnnotationPropertyOfAxiom axiom) {}
-		public void visit(OWLAnnotationProperty property) {}
-		public void visit(OWLAnnotationValue value) {}
+		//public void visit(OWLAnnotationProperty property) {}
+		//public void visit(OWLAnnotationValue value) {}
 	}
 
 	private boolean ignore(OWLEntity en) {

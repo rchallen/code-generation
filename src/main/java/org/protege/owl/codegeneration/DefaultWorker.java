@@ -15,6 +15,7 @@ import static org.protege.owl.codegeneration.SubstitutionVariable.PROPERTY_IRI;
 import static org.protege.owl.codegeneration.SubstitutionVariable.UPPERCASE_CLASS;
 import static org.protege.owl.codegeneration.SubstitutionVariable.UPPERCASE_PROPERTY;
 import static org.protege.owl.codegeneration.SubstitutionVariable.USER;
+import static org.protege.owl.codegeneration.SubstitutionVariable.NOT_NULL_ANNOT;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +24,6 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Date;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -176,7 +176,7 @@ public class DefaultWorker implements Worker {
 			break;
 		case CREATE_OBJECT_PROPERTY_VOCABULARY:
 		case CREATE_DATA_PROPERTY_VOCABULARY:
-			configurePropertySubstitutions(substitutions, owlProperty);
+			configurePropertySubstitutions(substitutions, owlClass, owlProperty);
 			break;
 		case CREATE_INTERFACE_HEADER:
 		case CREATE_IMPLEMENTATION_HEADER:
@@ -188,7 +188,7 @@ public class DefaultWorker implements Worker {
 		case CREATE_OBJECT_PROPERTY_INTERFACE:
 		case CREATE_OBJECT_PROPERTY_IMPLEMENTATION:
 			configureClassSubstitutions(substitutions, owlClass);
-			configurePropertySubstitutions(substitutions, owlProperty);
+			configurePropertySubstitutions(substitutions, owlClass, owlProperty);
 	        propertyDeclarations.get(owlClass, owlProperty).configureSubstitutions(substitutions);
 			break;
 			
@@ -218,17 +218,47 @@ public class DefaultWorker implements Worker {
         substitutions.put(INTERFACE_LIST, getSuperInterfaceList(owlClass));
     }
 
+	private void doNullAnnotations(Map<SubstitutionVariable, String> substitutions, OWLClass owlClass, OWLEntity owlProperty) {
+		boolean nullable = false;
+		boolean singleton = false;
+		if (owlProperty instanceof OWLObjectProperty) {
+			nullable = inference.isNullable(owlClass, (OWLObjectProperty) owlProperty);
+			singleton = inference.isSingleton(owlClass, (OWLObjectProperty) owlProperty);
+		} else {
+			nullable = inference.isNullable(owlClass, (OWLDataProperty) owlProperty);
+			singleton = inference.isSingleton(owlClass, (OWLDataProperty) owlProperty);
+		}
+		
+		if (nullable) {
+			if (singleton) {
+				// 0..1
+				substitutions.put(NOT_NULL_ANNOT,"");
+			} else {
+				// 0..*
+				substitutions.put(NOT_NULL_ANNOT,"");
+			}
+		} else {
+			if (singleton) {
+				// 1..1
+				substitutions.put(NOT_NULL_ANNOT,"@NotNull");
+			} else {
+				// 1..*
+				substitutions.put(NOT_NULL_ANNOT,"@NotNull @Size(min=1)");
+			}
+		}
+	}
+	
 	private void configurePropertySubstitutions(Map<SubstitutionVariable, String> substitutions,
-                                                OWLEntity owlProperty) {
+				OWLClass owlClass, OWLEntity owlProperty) {
         String propertyName;
         if (owlProperty instanceof OWLObjectProperty) {
             OWLObjectProperty owlObjectProperty = (OWLObjectProperty) owlProperty;
             propertyName = names.getObjectPropertyName(owlObjectProperty);
-        }
-        else {
+        } else {
             OWLDataProperty owlDataProperty = (OWLDataProperty) owlProperty;
             propertyName = names.getDataPropertyName(owlDataProperty);
         }
+        if (owlClass != null) doNullAnnotations(substitutions,owlClass, owlProperty);
         String propertyCapitalized = NamingUtilities.convertInitialLetterToUpperCase(propertyName);
         String propertyUpperCase = propertyName.toUpperCase();
         if (owlProperty instanceof OWLObjectProperty) {
@@ -242,6 +272,7 @@ public class DefaultWorker implements Worker {
         substitutions.put(CAPITALIZED_PROPERTY, propertyCapitalized);
         substitutions.put(UPPERCASE_PROPERTY, propertyUpperCase);
         substitutions.put(PROPERTY_IRI, owlProperty.getIRI().toString());
+       
     }
 	
 
