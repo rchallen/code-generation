@@ -148,7 +148,7 @@ extends AbstractMojo
 			inference = new ReasonerBasedInference(owlOntology, reasoner);
 		} else {
 			OWLReasonerFactory rFactory = new ReasonerFactory();
-			OWLReasoner reasoner = rFactory.createReasoner(owlOntology);
+			OWLReasoner reasoner = rFactory.createNonBufferingReasoner(owlOntology);
 			inference = new ReasonerBasedInference(owlOntology, reasoner);
 		}
 		// inference.preCompute();

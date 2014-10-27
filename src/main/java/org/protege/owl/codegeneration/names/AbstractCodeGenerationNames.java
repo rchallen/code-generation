@@ -9,11 +9,19 @@ public abstract class AbstractCodeGenerationNames implements CodeGenerationNames
 	
 	
 	public AbstractCodeGenerationNames(CodeGenerationOptions options) {
-		this.options = options;
+		this.setOptions(options);
 	}
     
     public String getImplementationName(OWLClass owlClass) {
         return "Default" + getInterfaceName(owlClass);
     }
+
+	public CodeGenerationOptions getOptions() {
+		return options;
+	}
+
+	public void setOptions(CodeGenerationOptions options) {
+		this.options = options;
+	}
 
 }

@@ -6,10 +6,10 @@
     /**
      * Gets all property values for the ${owlProperty} property.<p>
      * ${javadoc}
-     * @returns a collection of values for the ${owlProperty} property.
+     * @returns a collection of ${propertyRangeForInterface} values for the ${owlProperty} property.
      */
-    ${atNotNull}
-    ${propertyRangeForClass} get${OwlProperty}();
+    ${atNotNull} @IRI("${propertyIri}")
+    ${propertyRangeForInterface} get${OwlProperty}();
 
     /**
      * Checks if the class has a ${owlProperty} property value.<p>

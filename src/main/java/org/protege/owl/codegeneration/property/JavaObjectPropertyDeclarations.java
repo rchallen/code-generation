@@ -53,9 +53,9 @@ public class JavaObjectPropertyDeclarations implements JavaPropertyDeclarations 
 	}
 
 	public void configureSubstitutions(Map<SubstitutionVariable, String> substitutions) {
-		substitutions.put(PROPERTY_RANGE_FOR_INTERFACE, getObjectPropertyRangeForClass(true));
 		substitutions.put(PROPERTY_RANGE_FOR_CLASS, getObjectPropertyRangeForClass(false));
-        substitutions.put(PROPERTY_RANGE_IMPLEMENTATION, getObjectPropertyRange(false));
+		substitutions.put(PROPERTY_RANGE_FOR_INTERFACE, getObjectPropertyRangeForClass(true));
+		substitutions.put(PROPERTY_RANGE_IMPLEMENTATION, getObjectPropertyRange(false));
         substitutions.put(PROPERTY_RANGE, getObjectPropertyRange(true));
 	}
 
@@ -67,7 +67,7 @@ public class JavaObjectPropertyDeclarations implements JavaPropertyDeclarations 
 	}
 	
 	private String getObjectPropertyRange(boolean isInterface) {
-		OWLClass range = inference.getRange(property);
+		OWLClass range = inference.getRange(owlClass,property);
 		if (range == null || !inference.getAllOwlClasses().contains(range)) {
 			return isInterface ? Constants.UKNOWN_CODE_GENERATED_INTERFACE : Constants.ABSTRACT_CODE_GENERATOR_INDIVIDUAL_CLASS;
 		}

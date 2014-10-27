@@ -9,19 +9,11 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
-import org.protege.owl.codegeneration.Constants;
 import org.protege.owl.codegeneration.HandledDatatypes;
 import org.protege.owl.codegeneration.names.CodeGenerationNames;
 import org.protege.owl.codegeneration.property.JavaDataPropertyDeclarations;
 import org.protege.owl.codegeneration.property.JavaObjectPropertyDeclarations;
 import org.protege.owl.codegeneration.property.JavaPropertyDeclarations;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAnnotation;
-import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationObjectVisitor;
-import org.semanticweb.owlapi.model.OWLAnnotationPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -32,7 +24,6 @@ import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLSubAnnotationPropertyOfAxiom;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
@@ -103,43 +94,10 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 		return reasoner.getSuperClasses(owlClass, true).getFlattened();
 	}
 
-	private static class Ignored implements OWLAnnotationObjectVisitor {
-		boolean ignore = false;
-		public boolean getIgnore() {return ignore;}
-		public void visit(OWLAnonymousIndividual individual) {}
-		@Override
-		public void visit(IRI iri) {}
-		@Override
-		public void visit(OWLLiteral literal) {}
-		@Override
-		public void visit(OWLAnnotation node) {
-			if (node.getProperty().equals(Constants.IGNORE)) {
-				OWLLiteral c = (OWLLiteral) node.getValue();
-				ignore = Boolean.parseBoolean(c.getLiteral());
-			}    	        
-		}
-		@Override
-		public void visit(OWLAnnotationAssertionAxiom axiom) {}
-		@Override
-		public void visit(OWLAnnotationPropertyDomainAxiom axiom) {}
-		@Override
-		public void visit(OWLAnnotationPropertyRangeAxiom axiom) {}
-		@Override
-		public void visit(OWLSubAnnotationPropertyOfAxiom axiom) {}
-		//public void visit(OWLAnnotationProperty property) {}
-		//public void visit(OWLAnnotationValue value) {}
-	}
-
 	private boolean ignore(OWLEntity en) {
-		Ignored visitor = new Ignored();
-		Set<OWLAnnotation> annotations = en.getAnnotations(ontology);
-		for (OWLAnnotation anno : annotations) {
-			anno.accept(visitor);
-		}
-		return visitor.getIgnore();
+		return Ignored.ignore(en, ontology);
 	}
-
-
+	
 	@Override
 	public Set<JavaPropertyDeclarations> getJavaPropertyDeclarations(OWLClass cls, CodeGenerationNames names) {
 

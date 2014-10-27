@@ -191,6 +191,8 @@ public class DefaultWorker implements Worker {
 			configurePropertySubstitutions(substitutions, owlClass, owlProperty);
 	        propertyDeclarations.get(owlClass, owlProperty).configureSubstitutions(substitutions);
 			break;
+		default:
+			break;
 			
 		}
 		
