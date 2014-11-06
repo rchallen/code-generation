@@ -26,7 +26,6 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.structural.StructuralReasoner;
 
 public class ReasonerBasedInference implements CodeGenerationInference {
 	public static final Logger LOGGER = Logger.getLogger(ReasonerBasedInference.class);
@@ -39,7 +38,8 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 	private Map<OWLClass, Map<OWLObjectProperty, OWLClass>> objectRangeMap = new HashMap<OWLClass, Map<OWLObjectProperty, OWLClass>>();
 	private Map<OWLClass, Map<OWLDataProperty, OWLDatatype>> dataRangeMap = new HashMap<OWLClass, Map<OWLDataProperty,OWLDatatype>>();
 
-
+	private static Map<OWLNamedIndividual, Map<OWLClass, Boolean>> canAsCache = new HashMap<OWLNamedIndividual, Map<OWLClass,Boolean>>();  
+	
 	public ReasonerBasedInference(OWLOntology ontology, OWLReasoner reasoner) {
 		this.ontology = ontology;
 		this.reasoner = reasoner;
@@ -187,17 +187,20 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 
 	@Override
 	public boolean canAs(OWLNamedIndividual i, OWLClass c) {
-		if (reasoner instanceof StructuralReasoner) {
-			LOGGER.debug("Structural reasoner check.");
-			return reasoner.getTypes(i, false).containsEntity(c);
-		} else {
-			LOGGER.debug("Inferencing reasoner check.");
-			OWLDataFactory factory = ontology.getOWLOntologyManager().getOWLDataFactory();
-			return reasoner.isSatisfiable(factory.getOWLObjectIntersectionOf(c, factory.getOWLObjectOneOf(i)));
+		if (!canAsCache.containsKey(i)) {
+			canAsCache.put(i, new HashMap<OWLClass,Boolean>());
+		} 
+		if (!canAsCache.get(i).containsKey(c)) {
+			LOGGER.debug("Reasoner check.");
+			canAsCache.get(i).put(c, 
+				reasoner.getTypes(i, false).containsEntity(c)
+			);
 		}
+		return canAsCache.get(i).get(c);
+		
+		//	OWLDataFactory factory = ontology.getOWLOntologyManager().getOWLDataFactory();
+		//	return reasoner.isSatisfiable(factory.getOWLObjectIntersectionOf(c, factory.getOWLObjectOneOf(i)));
 	}
-
-	
 	
 	@Override
 	public Collection<OWLClass> getTypes(OWLNamedIndividual i) {
