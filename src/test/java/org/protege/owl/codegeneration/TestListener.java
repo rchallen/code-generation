@@ -53,7 +53,8 @@ public class TestListener {
             return modified;
         }
         
-        public void clear() {
+        @SuppressWarnings("unused")
+		public void clear() {
             created.clear();
             modified.clear();
         }

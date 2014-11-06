@@ -99,7 +99,7 @@ public class TestInferredCodeGeneration {
 		assertEquals(values.iterator().next().getOwlIndividual().getIRI().toString(), TestUtilities.NS01 + "#y");
 	}
 	
-	@Test
+	@Test //(expectedExceptions={ClassCastException.class})
 	public void testBadType() throws Exception {
 		MyInferredFactory factory = TestUtilities.openFactory(TestUtilities.ONTOLOGY01, MyInferredFactory.class, true);
 		IriB x = factory.getIriB(TestUtilities.NS01 + "#x");

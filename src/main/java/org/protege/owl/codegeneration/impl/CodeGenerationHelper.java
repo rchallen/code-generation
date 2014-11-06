@@ -54,6 +54,7 @@ public class CodeGenerationHelper {
     public void addPropertyValue(OWLNamedIndividual i, OWLObjectProperty p, WrappedIndividual j) {
     	OWLAxiom axiom = owlDataFactory.getOWLObjectPropertyAssertionAxiom(p, i, j.getOwlIndividual());
     	manager.addAxiom(owlOntology, axiom);
+    	//TODO: we should be checking the reasoner says this is consistent, shoudln't we?
     }
     
     public void removePropertyValue(OWLNamedIndividual i, OWLObjectProperty p, WrappedIndividual j) {

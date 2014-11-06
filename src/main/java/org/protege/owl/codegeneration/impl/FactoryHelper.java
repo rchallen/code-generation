@@ -5,8 +5,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.protege.owl.codegeneration.CodeGenerationRuntimeException;
 import org.protege.owl.codegeneration.inference.CodeGenerationInference;
+import org.protege.owl.codegeneration.inference.ReasonerBasedInference;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -15,6 +17,9 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class FactoryHelper {
+	
+	public static final Logger LOGGER = Logger.getLogger(ReasonerBasedInference.class);
+
 	private OWLOntology owlOntology;
 	private OWLOntologyManager manager;
 	private OWLDataFactory owlDataFactory;
@@ -35,9 +40,6 @@ public class FactoryHelper {
 	public <X extends WrappedIndividualImpl> X createWrappedIndividual(String name, OWLClass type, Class<X> c) {
 		OWLNamedIndividual i = owlDataFactory.getOWLNamedIndividual(IRI.create(name));
 		manager.addAxiom(owlOntology, owlDataFactory.getOWLClassAssertionAxiom(type, i));
-		if (!inference.canAs(i, type)) {
-			return null;
-		}
 		return getWrappedIndividual(name, c);
 	}
 	
@@ -45,6 +47,7 @@ public class FactoryHelper {
 		IRI iri = IRI.create(name);
 		OWLNamedIndividual i = owlDataFactory.getOWLNamedIndividual(iri);
 		if (!inference.canAs(i, type)) {
+			LOGGER.debug("IRI: "+name+" cannot be cast to a "+type.getIRI());
 			return null;
 		}
 		return getWrappedIndividual(name, c);

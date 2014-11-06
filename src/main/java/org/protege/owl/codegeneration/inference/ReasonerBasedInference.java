@@ -26,6 +26,7 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import org.semanticweb.owlapi.reasoner.structural.StructuralReasoner;
 
 public class ReasonerBasedInference implements CodeGenerationInference {
 	public static final Logger LOGGER = Logger.getLogger(ReasonerBasedInference.class);
@@ -186,10 +187,18 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 
 	@Override
 	public boolean canAs(OWLNamedIndividual i, OWLClass c) {
-		OWLDataFactory factory = ontology.getOWLOntologyManager().getOWLDataFactory();
-		return reasoner.isSatisfiable(factory.getOWLObjectIntersectionOf(c, factory.getOWLObjectOneOf(i)));
+		if (reasoner instanceof StructuralReasoner) {
+			LOGGER.debug("Structural reasoner check.");
+			return reasoner.getTypes(i, false).containsEntity(c);
+		} else {
+			LOGGER.debug("Inferencing reasoner check.");
+			OWLDataFactory factory = ontology.getOWLOntologyManager().getOWLDataFactory();
+			return reasoner.isSatisfiable(factory.getOWLObjectIntersectionOf(c, factory.getOWLObjectOneOf(i)));
+		}
 	}
 
+	
+	
 	@Override
 	public Collection<OWLClass> getTypes(OWLNamedIndividual i) {
 		return reasoner.getTypes(i, true).getFlattened();
