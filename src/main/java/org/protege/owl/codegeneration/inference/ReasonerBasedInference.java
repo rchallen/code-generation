@@ -26,7 +26,6 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.structural.StructuralReasoner;
 
 public class ReasonerBasedInference implements CodeGenerationInference {
 	public static final Logger LOGGER = Logger.getLogger(ReasonerBasedInference.class);
@@ -39,7 +38,8 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 	private Map<OWLClass, Map<OWLObjectProperty, OWLClass>> objectRangeMap = new HashMap<OWLClass, Map<OWLObjectProperty, OWLClass>>();
 	private Map<OWLClass, Map<OWLDataProperty, OWLDatatype>> dataRangeMap = new HashMap<OWLClass, Map<OWLDataProperty,OWLDatatype>>();
 
-
+	private static Map<OWLNamedIndividual, Map<OWLClass, Boolean>> canAsCache = new HashMap<OWLNamedIndividual, Map<OWLClass,Boolean>>();  
+	
 	public ReasonerBasedInference(OWLOntology ontology, OWLReasoner reasoner) {
 		this.ontology = ontology;
 		this.reasoner = reasoner;
@@ -187,17 +187,21 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 
 	@Override
 	public boolean canAs(OWLNamedIndividual i, OWLClass c) {
-		if (reasoner instanceof StructuralReasoner) {
-			LOGGER.debug("Structural reasoner check.");
-			return reasoner.getTypes(i, false).containsEntity(c);
-		} else {
-			LOGGER.debug("Inferencing reasoner check.");
-			OWLDataFactory factory = ontology.getOWLOntologyManager().getOWLDataFactory();
-			return reasoner.isSatisfiable(factory.getOWLObjectIntersectionOf(c, factory.getOWLObjectOneOf(i)));
+		long time = System.currentTimeMillis();
+		if (!canAsCache.containsKey(i)) {
+			canAsCache.put(i, new HashMap<OWLClass,Boolean>());
+		} 
+		if (!canAsCache.get(i).containsKey(c)) {
+			canAsCache.get(i).put(c, 
+				reasoner.getTypes(i, false).containsEntity(c)
+			);
 		}
+		LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner check.");
+		return canAsCache.get(i).get(c);
+		
+		//	OWLDataFactory factory = ontology.getOWLOntologyManager().getOWLDataFactory();
+		//	return reasoner.isSatisfiable(factory.getOWLObjectIntersectionOf(c, factory.getOWLObjectOneOf(i)));
 	}
-
-	
 	
 	@Override
 	public Collection<OWLClass> getTypes(OWLNamedIndividual i) {
@@ -206,11 +210,15 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 
 	@Override
 	public Collection<OWLNamedIndividual> getPropertyValues(OWLNamedIndividual i, OWLObjectProperty p) {
-		return reasoner.getObjectPropertyValues(i, p).getFlattened();
+		long time = System.currentTimeMillis();
+		Collection<OWLNamedIndividual> out = reasoner.getObjectPropertyValues(i, p).getFlattened(); 
+		if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner getObjectProperty: "+p.toStringID()+" on "+i.toStringID());
+		return out;
 	}
 
 	@Override
 	public Collection<OWLLiteral> getPropertyValues(OWLNamedIndividual i, OWLDataProperty p) {
+		long time = System.currentTimeMillis();
 		Set<OWLLiteral> results = new HashSet<OWLLiteral>();
 		results.addAll(reasoner.getDataPropertyValues(i, p));
 		// the behavior of getDataPropertyValues is somewhat undefined
@@ -218,6 +226,7 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 		for (OWLOntology imported : ontology.getImportsClosure()) {
 			results.addAll(i.getDataPropertyValues(p, imported));
 		}
+		if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner getDataProperty: "+p.toStringID()+" on "+i.toStringID());
 		return results;
 	}
 
