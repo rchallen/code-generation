@@ -187,6 +187,7 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 
 	@Override
 	public boolean canAs(OWLNamedIndividual i, OWLClass c) {
+		long time = System.currentTimeMillis();
 		if (!canAsCache.containsKey(i)) {
 			canAsCache.put(i, new HashMap<OWLClass,Boolean>());
 		} 
@@ -196,6 +197,7 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 				reasoner.getTypes(i, false).containsEntity(c)
 			);
 		}
+		LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner check.");
 		return canAsCache.get(i).get(c);
 		
 		//	OWLDataFactory factory = ontology.getOWLOntologyManager().getOWLDataFactory();
@@ -209,11 +211,15 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 
 	@Override
 	public Collection<OWLNamedIndividual> getPropertyValues(OWLNamedIndividual i, OWLObjectProperty p) {
-		return reasoner.getObjectPropertyValues(i, p).getFlattened();
+		long time = System.currentTimeMillis();
+		Collection<OWLNamedIndividual> out = reasoner.getObjectPropertyValues(i, p).getFlattened(); 
+		if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner getObjectProperty: "+p.toStringID()+" on "+i.toStringID());
+		return out;
 	}
 
 	@Override
 	public Collection<OWLLiteral> getPropertyValues(OWLNamedIndividual i, OWLDataProperty p) {
+		long time = System.currentTimeMillis();
 		Set<OWLLiteral> results = new HashSet<OWLLiteral>();
 		results.addAll(reasoner.getDataPropertyValues(i, p));
 		// the behavior of getDataPropertyValues is somewhat undefined
@@ -221,6 +227,7 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 		for (OWLOntology imported : ontology.getImportsClosure()) {
 			results.addAll(i.getDataPropertyValues(p, imported));
 		}
+		if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner getDataProperty: "+p.toStringID()+" on "+i.toStringID());
 		return results;
 	}
 
