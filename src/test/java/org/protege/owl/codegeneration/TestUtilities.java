@@ -13,6 +13,7 @@ import java.util.Collection;
 
 import org.protege.owl.codegeneration.inference.CodeGenerationInference;
 import org.protege.owl.codegeneration.inference.ReasonerBasedInference;
+import org.protege.owl.codegeneration.inference.RuntimeInference;
 import org.protege.owl.codegeneration.inference.SimpleInference;
 import org.protege.owl.codegeneration.test.GenerateTestCode;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -71,7 +72,7 @@ public class TestUtilities {
 	}
 	
 	public static <X> X openFactory(String ontologyLocation, Class<X> factoryClass, boolean useInference) throws SecurityException, NoSuchMethodException, OWLOntologyCreationException, InstantiationException, IllegalAccessException, ClassNotFoundException, IllegalArgumentException, InvocationTargetException  {
-		Constructor<? extends X> constructor = factoryClass.getConstructor(OWLOntology.class, CodeGenerationInference.class);
+		Constructor<? extends X> constructor = factoryClass.getConstructor(OWLOntology.class, RuntimeInference.class);
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		GenerateTestCode.addIRIMappers(manager);
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File("src/test/resources/" + ontologyLocation));

@@ -7,7 +7,7 @@ import java.util.TreeSet;
 import org.protege.owl.codegeneration.CodeGenerationFactory;
 import org.protege.owl.codegeneration.WrappedIndividual;
 import org.protege.owl.codegeneration.impl.WrappedIndividualImpl;
-import org.protege.owl.codegeneration.inference.CodeGenerationInference;
+import org.protege.owl.codegeneration.inference.RuntimeInference;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLAxiomChange;
@@ -24,7 +24,7 @@ public abstract class CodeGenerationListener<X extends WrappedIndividual> implem
     private Set<OWLNamedIndividual> handledForCreation = new TreeSet<OWLNamedIndividual>();
     private Set<OWLNamedIndividual> handledForModification = new TreeSet<OWLNamedIndividual>();
     private CodeGenerationFactory factory;
-    private CodeGenerationInference inference;
+    private RuntimeInference inference;
     private Class<? extends X> javaInterface;
     private OWLClass type;
 

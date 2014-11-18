@@ -39,7 +39,7 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 	private Map<OWLClass, Map<OWLDataProperty, OWLDatatype>> dataRangeMap = new HashMap<OWLClass, Map<OWLDataProperty,OWLDatatype>>();
 
 	private static Map<OWLNamedIndividual, Map<OWLClass, Boolean>> canAsCache = new HashMap<OWLNamedIndividual, Map<OWLClass,Boolean>>();  
-	
+
 	public ReasonerBasedInference(OWLOntology ontology, OWLReasoner reasoner) {
 		this.ontology = ontology;
 		this.reasoner = reasoner;
@@ -69,7 +69,7 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 		}
 		return allClasses;
 	}
-	
+
 	@Override
 	public Collection<OWLClass> getOwlClasses() {
 		ArrayList<OWLClass> out = new ArrayList<OWLClass>(); 
@@ -98,7 +98,7 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 	private boolean ignore(OWLEntity en) {
 		return Ignored.ignore(en, ontology);
 	}
-	
+
 	@Override
 	public Set<JavaPropertyDeclarations> getJavaPropertyDeclarations(OWLClass cls, CodeGenerationNames names) {
 
@@ -194,16 +194,16 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 		if (!canAsCache.get(i).containsKey(c)) {
 			LOGGER.debug("Reasoner check.");
 			canAsCache.get(i).put(c, 
-				reasoner.getTypes(i, false).containsEntity(c)
-			);
+					reasoner.getTypes(i, false).containsEntity(c)
+					);
 		}
 		LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner check.");
 		return canAsCache.get(i).get(c);
-		
+
 		//	OWLDataFactory factory = ontology.getOWLOntologyManager().getOWLDataFactory();
 		//	return reasoner.isSatisfiable(factory.getOWLObjectIntersectionOf(c, factory.getOWLObjectOneOf(i)));
 	}
-	
+
 	@Override
 	public Collection<OWLClass> getTypes(OWLNamedIndividual i) {
 		return reasoner.getTypes(i, true).getFlattened();
@@ -234,75 +234,76 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 	/* *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 	 * 
 	 */
-	 private static <X extends OWLEntity> X asSingleton(Collection<X> xs, OWLOntology owlOntology) {
-		 X result = null;
-		 for (X x : xs) {
-			 if (owlOntology.containsEntityInSignature(x, true)) {
-				 if (result == null) {
-					 result = x;
-				 }
-				 else {
-					 return null;
-				 }
-			 }
-		 }
-		 return result;
-	 }
+	private static <X extends OWLEntity> X asSingleton(Collection<X> xs, OWLOntology owlOntology) {
+		X result = null;
+		for (X x : xs) {
+			if (owlOntology.containsEntityInSignature(x, true)) {
+				if (result == null) {
+					result = x;
+				}
+				else {
+					return null;
+				}
+			}
+		}
+		return result;
+	}
 
-	 private void initializeDomainMap() {
-		 domainMap = new HashMap<OWLClass, Set<OWLEntity>>();
-		 for (OWLObjectProperty p : ontology.getObjectPropertiesInSignature()) {
-			 OWLClassExpression mustHavePropertyValue = factory.getOWLObjectSomeValuesFrom(p, factory.getOWLThing());
-			 addPropertyToDomainMap(p, mustHavePropertyValue);
-		 }
-		 for (OWLDataProperty p : ontology.getDataPropertiesInSignature()) {
-			 OWLClassExpression mustHavePropertyValue = factory.getOWLDataSomeValuesFrom(p, factory.getTopDatatype());
-			 addPropertyToDomainMap(p, mustHavePropertyValue);
-		 }
-	 }
+	private void initializeDomainMap() {
+		domainMap = new HashMap<OWLClass, Set<OWLEntity>>();
+		for (OWLObjectProperty p : ontology.getObjectPropertiesInSignature()) {
+			OWLClassExpression mustHavePropertyValue = factory.getOWLObjectSomeValuesFrom(p, factory.getOWLThing());
+			addPropertyToDomainMap(p, mustHavePropertyValue);
+		}
+		for (OWLDataProperty p : ontology.getDataPropertiesInSignature()) {
+			OWLClassExpression mustHavePropertyValue = factory.getOWLDataSomeValuesFrom(p, factory.getTopDatatype());
+			addPropertyToDomainMap(p, mustHavePropertyValue);
+		}
+	}
 
-	 private void addPropertyToDomainMap(OWLEntity p, OWLClassExpression mustHavePropertyValue) {
-		 Set<OWLClass> equivalents = reasoner.getEquivalentClasses(mustHavePropertyValue).getEntities();
-		 if (!equivalents.isEmpty()) {
-			 for (OWLClass domain : equivalents) {
-				 addToDomainMap(domain, p);
-			 }
-		 }
-		 else {
-			 for (OWLClass domain : reasoner.getSuperClasses(mustHavePropertyValue, true).getFlattened()) {
-				 addToDomainMap(domain, p);
-			 }
-		 }
-	 }
+	private void addPropertyToDomainMap(OWLEntity p, OWLClassExpression mustHavePropertyValue) {
+		Set<OWLClass> equivalents = reasoner.getEquivalentClasses(mustHavePropertyValue).getEntities();
+		if (!equivalents.isEmpty()) {
+			for (OWLClass domain : equivalents) {
+				addToDomainMap(domain, p);
+			}
+		}
+		else {
+			for (OWLClass domain : reasoner.getSuperClasses(mustHavePropertyValue, true).getFlattened()) {
+				addToDomainMap(domain, p);
+			}
+		}
+	}
 
-	 private void addToDomainMap(OWLClass domain, OWLEntity property) {
-		 Set<OWLEntity> properties = domainMap.get(domain);
-		 if (properties == null) {
-			 properties = new TreeSet<OWLEntity>();
-			 domainMap.put(domain, properties);
-		 }
-		 properties.add(property);
-	 }
+	private void addToDomainMap(OWLClass domain, OWLEntity property) {
+		Set<OWLEntity> properties = domainMap.get(domain);
+		if (properties == null) {
+			properties = new TreeSet<OWLEntity>();
+			domainMap.put(domain, properties);
+		}
+		properties.add(property);
+	}
 
-	 @Override
-	 public boolean isNullable(OWLClass owlClass, OWLObjectProperty p) {
-		 OWLClassExpression intersection = factory
-				 .getOWLObjectIntersectionOf(owlClass, factory.getOWLObjectMaxCardinality(0, p));
-		 return reasoner.isSatisfiable(intersection);	
-	 }
+	@Override
+	public boolean isNullable(OWLClass owlClass, OWLObjectProperty p) {
+		OWLClassExpression intersection = factory
+				.getOWLObjectIntersectionOf(owlClass, factory.getOWLObjectMaxCardinality(0, p));
+		return reasoner.isSatisfiable(intersection);	
+	}
 
-	 @Override
-	 public boolean isSingleton(OWLClass owlClass, OWLObjectProperty p) {
-		 OWLClassExpression intersection = factory
-				 .getOWLObjectIntersectionOf(owlClass, factory.getOWLObjectMinCardinality(2, p));
-		 return !reasoner.isSatisfiable(intersection);
-	 }
+	@Override
+	public boolean isSingleton(OWLClass owlClass, OWLObjectProperty p) {
+		OWLClassExpression intersection = factory
+				.getOWLObjectIntersectionOf(owlClass, factory.getOWLObjectMinCardinality(2, p));
+		return !reasoner.isSatisfiable(intersection);
+	}
 
-	 @Override
-	 public boolean isSingleton(OWLClass owlClass, OWLDataProperty p) {
-		 OWLClassExpression intersection = factory
-				 .getOWLObjectIntersectionOf(owlClass, factory.getOWLDataMinCardinality(2, p));
-		 return !reasoner.isSatisfiable(intersection);
-	 }
+	@Override
+	public boolean isSingleton(OWLClass owlClass, OWLDataProperty p) {
+		OWLClassExpression intersection = factory
+				.getOWLObjectIntersectionOf(owlClass, factory.getOWLDataMinCardinality(2, p));
+		return !reasoner.isSatisfiable(intersection);
+	}
 
+	
 }

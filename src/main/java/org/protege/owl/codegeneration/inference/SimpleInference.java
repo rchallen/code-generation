@@ -364,5 +364,6 @@ public class SimpleInference implements CodeGenerationInference {
 		//TODO: change to allow filtering based on java:ignore
 		return getOwlClasses();
 	}
+
 	
 }

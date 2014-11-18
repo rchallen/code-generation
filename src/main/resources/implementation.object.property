@@ -3,10 +3,10 @@
      * Object Property ${propertyIri}
      */
     
-    ${atNotNull}
+    ${atProp}
     public ${propertyRangeForClass} get${OwlProperty}() {
         return getDelegate().getPropertyValues(getOwlIndividual(),
-                                               Vocabulary.${VocabProperty},
+                                               ${VocabProperty},
                                                ${propertyRangeImplementation}.class);
     }
 
@@ -16,13 +16,15 @@
 
     public void add${OwlProperty}(${propertyRange} new${OwlProperty}) {
         getDelegate().addPropertyValue(getOwlIndividual(),
-                                       Vocabulary.${VocabProperty},
-                                       new${OwlProperty});
+                                       ${VocabProperty},
+                                       new${OwlProperty},
+                                       ${VocabInverse});
     }
 
     public void remove${OwlProperty}(${propertyRange} old${OwlProperty}) {
         getDelegate().removePropertyValue(getOwlIndividual(),
-                                          Vocabulary.${VocabProperty},
-                                          old${OwlProperty});
+                                        ${VocabProperty},
+                                        old${OwlProperty},
+                                       	${VocabInverse});
     }
 

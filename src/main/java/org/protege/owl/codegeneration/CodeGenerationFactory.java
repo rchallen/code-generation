@@ -1,6 +1,6 @@
 package org.protege.owl.codegeneration;
 
-import org.protege.owl.codegeneration.inference.CodeGenerationInference;
+import org.protege.owl.codegeneration.inference.RuntimeInference;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
@@ -21,5 +21,5 @@ public interface CodeGenerationFactory {
 
     OWLClass getOwlClassFromJavaInterface(Class<?> javaInterface);
 
-    CodeGenerationInference getInference();
+    RuntimeInference getInference();
 }

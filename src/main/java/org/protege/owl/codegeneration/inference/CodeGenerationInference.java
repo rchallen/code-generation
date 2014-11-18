@@ -8,14 +8,10 @@ import org.protege.owl.codegeneration.property.JavaPropertyDeclarations;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDatatype;
-import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
 
-public interface CodeGenerationInference {
-	
-	OWLOntology getOWLOntology();
+public interface CodeGenerationInference extends RuntimeInference {
 	
 	void preCompute();
 	
@@ -45,16 +41,9 @@ public interface CodeGenerationInference {
 	
 	OWLDatatype getRange(OWLClass owlClass, OWLDataProperty p);
 
-	Collection<OWLNamedIndividual> getIndividuals(OWLClass owlClass);
-
-	boolean canAs(OWLNamedIndividual i, OWLClass c);
 
 	Collection<OWLClass> getTypes(OWLNamedIndividual i);
 	
-	Collection<OWLNamedIndividual> getPropertyValues(OWLNamedIndividual i, OWLObjectProperty p);
-	
-    Collection<OWLLiteral> getPropertyValues(OWLNamedIndividual i, OWLDataProperty p);
-
 	Collection<OWLClass> getAllOwlClasses();
 
 }

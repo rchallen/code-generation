@@ -8,7 +8,7 @@ import java.util.Set;
 import org.protege.owl.codegeneration.CodeGenerationRuntimeException;
 import org.protege.owl.codegeneration.HandledDatatypes;
 import org.protege.owl.codegeneration.WrappedIndividual;
-import org.protege.owl.codegeneration.inference.CodeGenerationInference;
+import org.protege.owl.codegeneration.inference.RuntimeInference;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -23,10 +23,10 @@ public class CodeGenerationHelper {
     private OWLOntology owlOntology;    
     private OWLDataFactory owlDataFactory;
     private OWLOntologyManager manager;
-    private CodeGenerationInference inference;
+    private RuntimeInference inference;
     
     
-    public CodeGenerationHelper(CodeGenerationInference inference) {
+    public CodeGenerationHelper(RuntimeInference inference) {
         this.inference = inference;
         this.owlOntology = inference.getOWLOntology();        
         manager = owlOntology.getOWLOntologyManager();
@@ -39,7 +39,7 @@ public class CodeGenerationHelper {
     
     public <X> Collection<X> getPropertyValues(OWLNamedIndividual i, OWLObjectProperty p, Class<X> c) {
         try {
-            Constructor<X> constructor = c.getConstructor(CodeGenerationInference.class, IRI.class);
+            Constructor<X> constructor = c.getConstructor(RuntimeInference.class, IRI.class);
             Set<X> results = new HashSet<X>();
             for (OWLNamedIndividual j : inference.getPropertyValues(i, p)) {
                 results.add(constructor.newInstance(inference, j.getIRI()));
@@ -51,16 +51,26 @@ public class CodeGenerationHelper {
         }
     }
  
-    public void addPropertyValue(OWLNamedIndividual i, OWLObjectProperty p, WrappedIndividual j) {
+    public void addPropertyValue(OWLNamedIndividual i, OWLObjectProperty p, WrappedIndividual j, OWLObjectProperty ep) {
     	OWLAxiom axiom = owlDataFactory.getOWLObjectPropertyAssertionAxiom(p, i, j.getOwlIndividual());
     	manager.addAxiom(owlOntology, axiom);
+    	if (ep != null) {
+    		OWLAxiom axiom2 = owlDataFactory.getOWLObjectPropertyAssertionAxiom(ep, j.getOwlIndividual(), i);
+    		manager.addAxiom(owlOntology, axiom2);
+    	}
     	//TODO: we should be checking the reasoner says this is consistent, shoudln't we?
     }
     
-    public void removePropertyValue(OWLNamedIndividual i, OWLObjectProperty p, WrappedIndividual j) {
+    public void removePropertyValue(OWLNamedIndividual i, OWLObjectProperty p, WrappedIndividual j, OWLObjectProperty ep) {
     	OWLAxiom axiom = owlDataFactory.getOWLObjectPropertyAssertionAxiom(p, i, j.getOwlIndividual());
     	for (OWLOntology imported : owlOntology.getImportsClosure()) {
         	manager.removeAxiom(imported, axiom);
+    	}
+    	if (ep != null) {
+    		OWLAxiom axiom2 = owlDataFactory.getOWLObjectPropertyAssertionAxiom(ep, j.getOwlIndividual(), i);
+        	for (OWLOntology imported : owlOntology.getImportsClosure()) {
+            	manager.removeAxiom(imported, axiom2);
+        	}   
     	}
     }
     
