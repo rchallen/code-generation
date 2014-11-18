@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.protege.owl.codegeneration.CodeGenerationRuntimeException;
 import org.protege.owl.codegeneration.inference.CodeGenerationInference;
 import org.protege.owl.codegeneration.inference.ReasonerBasedInference;
+import org.protege.owl.codegeneration.inference.RuntimeInference;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -23,9 +24,9 @@ public class FactoryHelper {
 	private OWLOntology owlOntology;
 	private OWLOntologyManager manager;
 	private OWLDataFactory owlDataFactory;
-	private CodeGenerationInference inference;
+	private RuntimeInference inference;
 	
-	public FactoryHelper(OWLOntology ontology, CodeGenerationInference inference) {
+	public FactoryHelper(OWLOntology ontology, RuntimeInference inference) {
 		this.owlOntology = ontology;
 		this.inference = inference;
 		manager = ontology.getOWLOntologyManager();
@@ -33,7 +34,8 @@ public class FactoryHelper {
 	}
 	
 	public void flushOwlReasoner() {
-	    inference.flush();
+		if (inference instanceof CodeGenerationInference)
+			((CodeGenerationInference) inference).flush();
 	}
 	
 	
@@ -55,7 +57,7 @@ public class FactoryHelper {
 	
 	private <X extends WrappedIndividualImpl> X getWrappedIndividual(String name, Class<X> c) {
 		try {
-    		Constructor<X> constructor = c.getConstructor(CodeGenerationInference.class, IRI.class);
+    		Constructor<X> constructor = c.getConstructor(RuntimeInference.class, IRI.class);
     		return constructor.newInstance(inference, IRI.create(name));
 		}
 		catch (Exception e) {

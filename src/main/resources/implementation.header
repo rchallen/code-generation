@@ -2,14 +2,17 @@ package ${package}.impl;
 
 import ${package}.*;
 
+import static ${package}.Vocabulary.*;
+
 import java.util.Collection;
 
 import org.protege.owl.codegeneration.WrappedIndividual;
 import org.protege.owl.codegeneration.impl.WrappedIndividualImpl;
 
-import org.protege.owl.codegeneration.inference.CodeGenerationInference;
+import org.protege.owl.codegeneration.inference.RuntimeInference;
 
 import org.semanticweb.owlapi.model.IRI;
+import org.protege.owl.codegeneration.Transitive;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import javax.validation.constraints.NotNull;
@@ -24,7 +27,7 @@ import javax.validation.constraints.Size;
 @SuppressWarnings("unused")
 public class ${implementationName} extends WrappedIndividualImpl implements ${interfaceName} {
 
-    public ${implementationName}(CodeGenerationInference inference, IRI iri) {
+    public ${implementationName}(RuntimeInference inference, IRI iri) {
         super(inference, iri);
     }
 

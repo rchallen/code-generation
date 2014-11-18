@@ -8,7 +8,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.protege.owl.codegeneration.WrappedIndividual;
-import org.protege.owl.codegeneration.inference.CodeGenerationInference;
+import org.protege.owl.codegeneration.inference.RuntimeInference;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -40,11 +40,11 @@ public class WrappedIndividualImpl implements WrappedIndividual {
      * @param inference
      * @param iri
      */
-    public WrappedIndividualImpl(CodeGenerationInference inference, IRI iri) {
+    public WrappedIndividualImpl(RuntimeInference inference, IRI iri) {
         this(inference, inference.getOWLOntology().getOWLOntologyManager().getOWLDataFactory().getOWLNamedIndividual(iri));
     }
     
-    public WrappedIndividualImpl(CodeGenerationInference inference, OWLNamedIndividual owlIndividual) {
+    public WrappedIndividualImpl(RuntimeInference inference, OWLNamedIndividual owlIndividual) {
         this.owlOntology = inference.getOWLOntology();
         this.owlIndividual = owlIndividual;
         delegate = new CodeGenerationHelper(inference);

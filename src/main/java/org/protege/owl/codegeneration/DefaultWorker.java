@@ -1,21 +1,6 @@
 package org.protege.owl.codegeneration;
 
-import static org.protege.owl.codegeneration.SubstitutionVariable.CAPITALIZED_PROPERTY;
-import static org.protege.owl.codegeneration.SubstitutionVariable.CLASS_IRI;
-import static org.protege.owl.codegeneration.SubstitutionVariable.DATE;
-import static org.protege.owl.codegeneration.SubstitutionVariable.FACTORY_CLASS_NAME;
-import static org.protege.owl.codegeneration.SubstitutionVariable.FACTORY_PACKAGE_NAME;
-import static org.protege.owl.codegeneration.SubstitutionVariable.IMPLEMENTATION_NAME;
-import static org.protege.owl.codegeneration.SubstitutionVariable.INTERFACE_LIST;
-import static org.protege.owl.codegeneration.SubstitutionVariable.INTERFACE_NAME;
-import static org.protege.owl.codegeneration.SubstitutionVariable.JAVADOC;
-import static org.protege.owl.codegeneration.SubstitutionVariable.PACKAGE;
-import static org.protege.owl.codegeneration.SubstitutionVariable.PROPERTY;
-import static org.protege.owl.codegeneration.SubstitutionVariable.PROPERTY_IRI;
-import static org.protege.owl.codegeneration.SubstitutionVariable.UPPERCASE_CLASS;
-import static org.protege.owl.codegeneration.SubstitutionVariable.UPPERCASE_PROPERTY;
-import static org.protege.owl.codegeneration.SubstitutionVariable.USER;
-import static org.protege.owl.codegeneration.SubstitutionVariable.NOT_NULL_ANNOT;
+import static org.protege.owl.codegeneration.SubstitutionVariable.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,9 +23,11 @@ import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLInverseObjectPropertiesAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLRuntimeException;
 
 public class DefaultWorker implements Worker {
 	private HashMap<String, String> templateMap = new HashMap<String, String>();
@@ -220,55 +207,71 @@ public class DefaultWorker implements Worker {
         substitutions.put(INTERFACE_LIST, getSuperInterfaceList(owlClass));
     }
 
-	private void doNullAnnotations(Map<SubstitutionVariable, String> substitutions, OWLClass owlClass, OWLEntity owlProperty) {
+	private void doAnnotations(Map<SubstitutionVariable, String> substitutions, OWLClass owlClass, OWLEntity owlProperty) {
 		boolean nullable = false;
 		boolean singleton = false;
+		boolean transitive = false;
 		if (owlProperty instanceof OWLObjectProperty) {
 			nullable = inference.isNullable(owlClass, (OWLObjectProperty) owlProperty);
 			singleton = inference.isSingleton(owlClass, (OWLObjectProperty) owlProperty);
+			transitive = owlProperty.asOWLObjectProperty().isTransitive(owlOntology);
 		} else {
 			nullable = inference.isNullable(owlClass, (OWLDataProperty) owlProperty);
 			singleton = inference.isSingleton(owlClass, (OWLDataProperty) owlProperty);
+			transitive = false;
 		}
+		StringBuilder annot = new StringBuilder();
 		
 		if (nullable) {
 			if (singleton) {
 				// 0..1
-				substitutions.put(NOT_NULL_ANNOT,"");
-			} else {
 				// 0..*
-				substitutions.put(NOT_NULL_ANNOT,"");
 			}
 		} else {
+			annot.append("@NotNull ");
 			if (singleton) {
 				// 1..1
-				substitutions.put(NOT_NULL_ANNOT,"@NotNull");
 			} else {
 				// 1..*
-				substitutions.put(NOT_NULL_ANNOT,"@NotNull @Size(min=1)");
+				annot.append("@Size(min=1) ");
 			}
 		}
+		
+		if (transitive) annot.append("@Transitive ");
+		
+		substitutions.put(PROPERTY_ANNOTATION,annot.toString());
 	}
 	
 	private void configurePropertySubstitutions(Map<SubstitutionVariable, String> substitutions,
 				OWLClass owlClass, OWLEntity owlProperty) {
         String propertyName;
         if (owlProperty instanceof OWLObjectProperty) {
-            OWLObjectProperty owlObjectProperty = (OWLObjectProperty) owlProperty;
+            
+        	OWLObjectProperty owlObjectProperty = (OWLObjectProperty) owlProperty;
             propertyName = names.getObjectPropertyName(owlObjectProperty);
+            
+            substitutions.put(SubstitutionVariable.VOCABULARY_PROPERTY, "OBJECT_PROPERTY_" + propertyName.toUpperCase());
+            
+            if (hasInverse(owlProperty.asOWLObjectProperty())) {
+            	OWLObjectProperty inverseProp = getInverse(((OWLObjectProperty) owlProperty));
+            	String invName = names.getObjectPropertyName(inverseProp).toUpperCase();
+            	substitutions.put(SubstitutionVariable.VOCABULARY_INVERSE, "OBJECT_PROPERTY_" + invName);
+            } else {
+            	substitutions.put(SubstitutionVariable.VOCABULARY_INVERSE, "null");
+            }
+            
         } else {
-            OWLDataProperty owlDataProperty = (OWLDataProperty) owlProperty;
+            
+        	OWLDataProperty owlDataProperty = owlProperty.asOWLDataProperty();
             propertyName = names.getDataPropertyName(owlDataProperty);
+            substitutions.put(SubstitutionVariable.VOCABULARY_PROPERTY, "DATA_PROPERTY_" + propertyName.toUpperCase());
         }
-        if (owlClass != null) doNullAnnotations(substitutions,owlClass, owlProperty);
+        
+        if (owlClass != null) doAnnotations(substitutions, owlClass, owlProperty);
+        
         String propertyCapitalized = NamingUtilities.convertInitialLetterToUpperCase(propertyName);
         String propertyUpperCase = propertyName.toUpperCase();
-        if (owlProperty instanceof OWLObjectProperty) {
-            substitutions.put(SubstitutionVariable.VOCABULARY_PROPERTY, "OBJECT_PROPERTY_" + propertyUpperCase);
-        }
-        else {
-            substitutions.put(SubstitutionVariable.VOCABULARY_PROPERTY, "DATA_PROPERTY_" + propertyUpperCase);
-        }
+        
         substitutions.put(JAVADOC, getJavadoc(owlProperty));
         substitutions.put(PROPERTY, propertyName);
         substitutions.put(CAPITALIZED_PROPERTY, propertyCapitalized);
@@ -277,6 +280,27 @@ public class DefaultWorker implements Worker {
        
     }
 	
+	public boolean hasInverse(OWLObjectProperty p) {
+		return getInverse(p) != null;
+	}
+
+	public OWLObjectProperty getInverse(OWLObjectProperty p) {
+
+		Set<OWLInverseObjectPropertiesAxiom> setInverseAxiom = owlOntology.getInverseObjectPropertyAxioms(p);
+			for(OWLInverseObjectPropertiesAxiom inverseAxiom : setInverseAxiom)	{
+				//System.out.print(inverseAxiom);
+				try {
+					if (inverseAxiom.getFirstProperty().asOWLObjectProperty().getIRI().equals(p.getIRI())) {
+						return inverseAxiom.getSecondProperty().asOWLObjectProperty();
+					} else {
+						return inverseAxiom.getFirstProperty().asOWLObjectProperty();
+					}
+				} catch (OWLRuntimeException e) {
+					//Something wasn't named.
+				}
+			}
+		return null;
+	}
 
 	
 	/* ******************************************************************************

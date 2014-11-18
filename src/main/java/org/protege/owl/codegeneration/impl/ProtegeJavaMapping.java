@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.protege.owl.codegeneration.WrappedIndividual;
-import org.protege.owl.codegeneration.inference.CodeGenerationInference;
+import org.protege.owl.codegeneration.inference.RuntimeInference;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -15,7 +15,7 @@ import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 public class ProtegeJavaMapping {
-    private CodeGenerationInference inference;
+    private RuntimeInference inference;
     private OWLDataFactory dataFactory;
     private OWLOntology ontology;
     
@@ -23,7 +23,7 @@ public class ProtegeJavaMapping {
     private Map<Class<?>, JavaAndOwlBean> interfaceMap = new HashMap<Class<?>, JavaAndOwlBean>();
     private Map<Class<?>, JavaAndOwlBean> implementationMap = new HashMap<Class<?>, JavaAndOwlBean>();
 
-    public void initialize(OWLOntology ontology, CodeGenerationInference inference) {
+    public void initialize(OWLOntology ontology, RuntimeInference inference) {
         this.ontology = ontology;
         this.inference = inference;
         dataFactory = ontology.getOWLOntologyManager().getOWLDataFactory();
@@ -84,7 +84,7 @@ public class ProtegeJavaMapping {
     
     private <X> X constructImplementation(Class<? extends X> implType, IRI id) {
         try {
-            Constructor<? extends X> con = implType.getConstructor(new Class[] { CodeGenerationInference.class, IRI.class});
+            Constructor<? extends X> con = implType.getConstructor(new Class[] { RuntimeInference.class, IRI.class});
             return con.newInstance(new Object[] { inference, id });
         }
         catch (Throwable t) {

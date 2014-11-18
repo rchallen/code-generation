@@ -17,6 +17,7 @@ public enum SubstitutionVariable {
 	CAPITALIZED_PROPERTY("OwlProperty"),
 	UPPERCASE_PROPERTY("OWLProperty"),
 	VOCABULARY_PROPERTY("VocabProperty"),
+	VOCABULARY_INVERSE("VocabInverse"),
 	PROPERTY_RANGE("propertyRange"),
 	PROPERTY_RANGE_FOR_INTERFACE("propertyRangeForInterface"),
 	PROPERTY_RANGE_FOR_CLASS("propertyRangeForClass"),
@@ -24,7 +25,7 @@ public enum SubstitutionVariable {
 	JAVADOC("javadoc"),
 	DATE("date"),
 	USER("user"),
-	NOT_NULL_ANNOT("atNotNull");
+	PROPERTY_ANNOTATION("atProp");
 	
 	private String name;
 	

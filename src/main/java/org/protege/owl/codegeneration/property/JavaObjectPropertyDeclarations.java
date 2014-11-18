@@ -43,7 +43,7 @@ public class JavaObjectPropertyDeclarations implements JavaPropertyDeclarations 
 	public OWLObjectProperty getOwlProperty() {
 		return property;
 	}
-
+	
 	public boolean isCollection() {
 		return !inference.isSingleton(owlClass, property);
 	}

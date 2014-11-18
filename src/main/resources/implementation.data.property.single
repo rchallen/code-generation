@@ -3,10 +3,10 @@
      * Data Property ${propertyIri}
      */
     
-    ${atNotNull} 
+    ${atProp} 
     public ${propertyRangeForClass} get${OwlProperty}() {
     	Collection<? extends ${propertyRange}> tmp = 
-			 getDelegate().getPropertyValues(getOwlIndividual(), Vocabulary.${VocabProperty}, ${propertyRange}.class);
+			 getDelegate().getPropertyValues(getOwlIndividual(), ${VocabProperty}, ${propertyRange}.class);
 		return tmp.isEmpty() ? null : (${propertyRangeForClass}) tmp.iterator().next();        
     }
 
@@ -16,10 +16,10 @@
 
 	//public void add${OwlProperty}(${propertyRange} new${OwlProperty}) {
 	public void add${OwlProperty}(Object new${OwlProperty}) {
-	    getDelegate().addPropertyValue(getOwlIndividual(), Vocabulary.${VocabProperty}, new${OwlProperty});
+	    getDelegate().addPropertyValue(getOwlIndividual(), ${VocabProperty}, new${OwlProperty});
     }
 
 	//public void remove${OwlProperty}(${propertyRange} old${OwlProperty}) {
     public void remove${OwlProperty}(Object old${OwlProperty}) {
-		getDelegate().removePropertyValue(getOwlIndividual(), Vocabulary.${VocabProperty}, old${OwlProperty});
+		getDelegate().removePropertyValue(getOwlIndividual(), ${VocabProperty}, old${OwlProperty});
     }
