@@ -24,11 +24,11 @@ public class SimpleRuntimeInference implements RuntimeInference {
 
 	static final Logger LOGGER = Logger.getLogger(ReasonerBasedInference.class);
 	ClassMap map;
-	
+
 	private static class ClassMap {
-		
+
 		HashMap<OWLClass, ClassMapEntry> entries = new HashMap<OWLClass, ClassMapEntry>();
-		
+
 		public ClassMap(OWLOntologyManager manager) {
 			for (OWLOntology allOntology: manager.getOntologies()) {
 				for (OWLClass owlClass: allOntology.getClassesInSignature(true)) {
@@ -41,25 +41,25 @@ public class SimpleRuntimeInference implements RuntimeInference {
 				}
 			}
 		}
-		
+
 		public ClassMapEntry getEntry(OWLClass c) {return entries.get(c);}
 	}
-	
+
 	private static class ClassMapEntry {
-		
+
 		OWLClass owlClass;
 		List<ClassMapEntry> parents = new ArrayList<ClassMapEntry>();
 		List<ClassMapEntry> children = new ArrayList<ClassMapEntry>();
-		
+
 		public ClassMapEntry(OWLClass owlClass) {
 			this.owlClass= owlClass;
 		}
-		
+
 		public void addParent(ClassMapEntry parent) {
 			parents.add(parent);
 			parent.children.add(this);
 		}
-		
+
 		public boolean isSubtype(OWLClass owlClass) {
 			if (this.owlClass.getIRI().equals(owlClass.getIRI())) return true;
 			for (ClassMapEntry parent : parents) {
@@ -67,7 +67,7 @@ public class SimpleRuntimeInference implements RuntimeInference {
 			}
 			return false;
 		}
-		
+
 		/*public boolean isSupertype(OWLClass owlClass) {
 			if (this.owlClass.getIRI().equals(owlClass.getIRI())) return true;
 			for (ClassMapEntry child : children) {
@@ -75,13 +75,13 @@ public class SimpleRuntimeInference implements RuntimeInference {
 			}
 			return false;
 		}*/
-		
+
 		public Set<OWLClass> getSubtypes() {
 			Set<OWLClass> out = new HashSet<OWLClass>();
 			addSubtypes(out);
 			return out;
 		}
-		
+
 		private void addSubtypes(Set<OWLClass> out) {
 			if (!out.contains(owlClass)) {
 				out.add(owlClass);
@@ -91,14 +91,16 @@ public class SimpleRuntimeInference implements RuntimeInference {
 			}
 		}
 	}
-	
+
 	OWLOntology ontology;
-	
+	OWLOntologyManager manager;
+
 	public SimpleRuntimeInference(OWLOntology ontology) {
 		this.ontology = ontology;
-		this.map = new ClassMap(ontology.getOWLOntologyManager());  
+		this.manager = ontology.getOWLOntologyManager();
+		this.map = new ClassMap(manager);  
 	}
-	
+
 	@Override
 	public OWLOntology getOWLOntology() {
 		return ontology;
@@ -106,43 +108,43 @@ public class SimpleRuntimeInference implements RuntimeInference {
 
 	@Override
 	public boolean canAs(OWLNamedIndividual i, OWLClass c) {
-	    long time = System.currentTimeMillis();
+		long time = System.currentTimeMillis();
 		Collection<OWLClass> types = getTypes(i);
-	    if (types.contains(c)) {
-	        return true;
-	    }
-	    for (OWLClass type : types) {
-	        if (map.getEntry(type).isSubtype(c)) {
-	            return true;
-	        }
-	    }
-	    if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner canAs: "+c.toStringID()+" on "+i.toStringID());
+		if (types.contains(c)) {
+			return true;
+		}
+		for (OWLClass type : types) {
+			if (map.getEntry(type).isSubtype(c)) {
+				return true;
+			}
+		}
+		if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner canAs: "+c.toStringID()+" on "+i.toStringID());
 		return false;
 	}
-	
+
 	@Override
 	public Collection<OWLNamedIndividual> getPropertyValues(OWLNamedIndividual i, OWLObjectProperty p) {
 		long time = System.currentTimeMillis();
 		Collection<OWLNamedIndividual> results = new HashSet<OWLNamedIndividual>();
-	    for (OWLOntology imported : ontology.getImportsClosure()) {
-	        for (OWLIndividual j : i.getObjectPropertyValues(p, imported)) {
-	            if (!j.isAnonymous()) {
-	                results.add(j.asOWLNamedIndividual());
-	            }
-	        }
-	    }
-	    if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner getObjectPropertyValues: "+p.toStringID()+" on "+i.toStringID());
+		for (OWLOntology imported : ontology.getImportsClosure()) {
+			for (OWLIndividual j : i.getObjectPropertyValues(p, imported)) {
+				if (!j.isAnonymous()) {
+					results.add(j.asOWLNamedIndividual());
+				}
+			}
+		}
+		if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner getObjectPropertyValues: "+p.toStringID()+" on "+i.toStringID());
 		return results;
 	}
-	
+
 	@Override
 	public Collection<OWLLiteral> getPropertyValues(OWLNamedIndividual i, OWLDataProperty p) {
 		long time = System.currentTimeMillis();
 		Set<OWLLiteral> results = new HashSet<OWLLiteral>();
-        for (OWLOntology imported : ontology.getImportsClosure()) {
-            results.addAll(i.getDataPropertyValues(p, imported));
-        }
-        if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner getDataPropertyValues: "+p.toStringID()+" on "+i.toStringID());
+		for (OWLOntology imported : ontology.getImportsClosure()) {
+			results.addAll(i.getDataPropertyValues(p, imported));
+		}
+		if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner getDataPropertyValues: "+p.toStringID()+" on "+i.toStringID());
 		return results;
 	}
 
@@ -151,17 +153,17 @@ public class SimpleRuntimeInference implements RuntimeInference {
 		long time = System.currentTimeMillis();
 		Set<OWLNamedIndividual> individuals = new HashSet<OWLNamedIndividual>();
 		for (OWLClass subtype: map.getEntry(owlClass).getSubtypes()) {
-		for (OWLIndividual i : subtype.getIndividuals(ontology)) {
-			if (!i.isAnonymous()) {
-				individuals.add(i.asOWLNamedIndividual());
+			for (OWLIndividual i : subtype.getIndividuals(ontology.getImportsClosure())) {
+				if (!i.isAnonymous()) {
+					individuals.add(i.asOWLNamedIndividual());
+				}
 			}
-		}
 		}
 		if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner getIndividuals: "+owlClass.toStringID());
 		return individuals;
 	}
 
-	
+
 	public Collection<OWLClass> getTypes(OWLNamedIndividual i) {
 		long time = System.currentTimeMillis();
 		Set<OWLClass> types = new HashSet<OWLClass>();
@@ -173,40 +175,40 @@ public class SimpleRuntimeInference implements RuntimeInference {
 		if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner getTypes: "+i.toStringID());
 		return types;
 	}
-	
-	
+
+
 	//=======================
-	
+
 	private static Collection<OWLClass> getSuperClasses(OWLClass owlClass, OWLOntologyManager manager) {
 		Set<OWLClass> superClasses = new HashSet<OWLClass>();
 		for (OWLOntology ontology: manager.getOntologies()) {
-		for (OWLClassExpression ce : owlClass.getSuperClasses(ontology.getImportsClosure())) {
-			if (!ce.isAnonymous()) {
-				superClasses.add(ce.asOWLClass());
+			for (OWLClassExpression ce : owlClass.getSuperClasses(ontology.getImportsClosure())) {
+				if (!ce.isAnonymous()) {
+					superClasses.add(ce.asOWLClass());
+				}
+				else if (ce instanceof OWLObjectIntersectionOf) {
+					superClasses.addAll(getNamedConjuncts((OWLObjectIntersectionOf) ce, ontology));
+				}
 			}
-			else if (ce instanceof OWLObjectIntersectionOf) {
-			    superClasses.addAll(getNamedConjuncts((OWLObjectIntersectionOf) ce, ontology));
+			for (OWLClassExpression ce : owlClass.getEquivalentClasses(ontology.getImportsClosure())) {
+				if (ce instanceof OWLObjectIntersectionOf) {
+					superClasses.addAll(getNamedConjuncts((OWLObjectIntersectionOf) ce, ontology));
+				}
 			}
-		}
-		for (OWLClassExpression ce : owlClass.getEquivalentClasses(ontology.getImportsClosure())) {
-		    if (ce instanceof OWLObjectIntersectionOf) {
-                superClasses.addAll(getNamedConjuncts((OWLObjectIntersectionOf) ce, ontology));
-            }
-		}
 		}
 		superClasses.remove(manager.getOWLDataFactory().getOWLThing());
 		return superClasses;
 	}
-	
+
 	private static Collection<OWLClass> getNamedConjuncts(OWLObjectIntersectionOf ce, OWLOntology ontology) {
-	    Set<OWLClass> conjuncts = new HashSet<OWLClass>();
-	    for (OWLClassExpression conjunct : ce.getOperands()) {
-	        if (!conjunct.isAnonymous()) {
-	            conjuncts.add(conjunct.asOWLClass());
-	        }
-	    }
-	    return conjuncts;
+		Set<OWLClass> conjuncts = new HashSet<OWLClass>();
+		for (OWLClassExpression conjunct : ce.getOperands()) {
+			if (!conjunct.isAnonymous()) {
+				conjuncts.add(conjunct.asOWLClass());
+			}
+		}
+		return conjuncts;
 	}
 
-	
+
 }
