@@ -18,6 +18,7 @@ import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class SimpleRuntimeInference implements RuntimeInference {
 
@@ -28,13 +29,15 @@ public class SimpleRuntimeInference implements RuntimeInference {
 		
 		HashMap<OWLClass, ClassMapEntry> entries = new HashMap<OWLClass, ClassMapEntry>();
 		
-		public ClassMap(OWLOntology ontology) {
-			for (OWLClass owlClass: ontology.getClassesInSignature(true)) {
-				entries.put(owlClass, new ClassMapEntry(owlClass,ontology));
-			}
-			for (Map.Entry<OWLClass, ClassMapEntry> entry: entries.entrySet()) {
-				for (OWLClass parent: getSuperClasses(entry.getKey(), ontology)) {
-					entry.getValue().addParent(entries.get(parent));
+		public ClassMap(OWLOntologyManager manager) {
+			for (OWLOntology allOntology: manager.getOntologies()) {
+				for (OWLClass owlClass: allOntology.getClassesInSignature(true)) {
+					entries.put(owlClass, new ClassMapEntry(owlClass));
+				}
+				for (Map.Entry<OWLClass, ClassMapEntry> entry: entries.entrySet()) {
+					for (OWLClass parent: getSuperClasses(entry.getKey(), manager)) {
+						entry.getValue().addParent(entries.get(parent));
+					}
 				}
 			}
 		}
@@ -48,7 +51,7 @@ public class SimpleRuntimeInference implements RuntimeInference {
 		List<ClassMapEntry> parents = new ArrayList<ClassMapEntry>();
 		List<ClassMapEntry> children = new ArrayList<ClassMapEntry>();
 		
-		public ClassMapEntry(OWLClass owlClass, OWLOntology ontology) {
+		public ClassMapEntry(OWLClass owlClass) {
 			this.owlClass= owlClass;
 		}
 		
@@ -93,7 +96,7 @@ public class SimpleRuntimeInference implements RuntimeInference {
 	
 	public SimpleRuntimeInference(OWLOntology ontology) {
 		this.ontology = ontology;
-		this.map = new ClassMap(ontology);  
+		this.map = new ClassMap(ontology.getOWLOntologyManager());  
 	}
 	
 	@Override
@@ -174,8 +177,9 @@ public class SimpleRuntimeInference implements RuntimeInference {
 	
 	//=======================
 	
-	private static Collection<OWLClass> getSuperClasses(OWLClass owlClass, OWLOntology ontology) {
+	private static Collection<OWLClass> getSuperClasses(OWLClass owlClass, OWLOntologyManager manager) {
 		Set<OWLClass> superClasses = new HashSet<OWLClass>();
+		for (OWLOntology ontology: manager.getOntologies()) {
 		for (OWLClassExpression ce : owlClass.getSuperClasses(ontology.getImportsClosure())) {
 			if (!ce.isAnonymous()) {
 				superClasses.add(ce.asOWLClass());
@@ -189,7 +193,8 @@ public class SimpleRuntimeInference implements RuntimeInference {
                 superClasses.addAll(getNamedConjuncts((OWLObjectIntersectionOf) ce, ontology));
             }
 		}
-		superClasses.remove(ontology.getOWLOntologyManager().getOWLDataFactory().getOWLThing());
+		}
+		superClasses.remove(manager.getOWLDataFactory().getOWLThing());
 		return superClasses;
 	}
 	
