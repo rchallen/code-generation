@@ -192,6 +192,7 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 			canAsCache.put(i, new HashMap<OWLClass,Boolean>());
 		} 
 		if (!canAsCache.get(i).containsKey(c)) {
+			LOGGER.debug("Reasoner check.");
 			canAsCache.get(i).put(c, 
 					reasoner.getTypes(i, false).containsEntity(c)
 					);
