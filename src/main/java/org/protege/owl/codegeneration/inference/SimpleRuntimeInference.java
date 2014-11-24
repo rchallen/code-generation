@@ -19,10 +19,11 @@ import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLRuntimeException;
 
 public class SimpleRuntimeInference implements RuntimeInference {
 
-	static final Logger LOGGER = Logger.getLogger(ReasonerBasedInference.class);
+	static final Logger LOGGER = Logger.getLogger(SimpleRuntimeInference.class);
 	ClassMap map;
 
 	private static class ClassMap {
@@ -32,10 +33,12 @@ public class SimpleRuntimeInference implements RuntimeInference {
 		public ClassMap(OWLOntologyManager manager) {
 			for (OWLOntology allOntology: manager.getOntologies()) {
 				for (OWLClass owlClass: allOntology.getClassesInSignature(true)) {
+					LOGGER.debug("Caching class hierarchy: "+owlClass.getIRI());
 					entries.put(owlClass, new ClassMapEntry(owlClass));
 				}
 				for (Map.Entry<OWLClass, ClassMapEntry> entry: entries.entrySet()) {
 					for (OWLClass parent: getSuperClasses(entry.getKey(), manager)) {
+						LOGGER.debug("Caching child: "+entry.getKey().getIRI()+" parent "+parent.getIRI());
 						entry.getValue().addParent(entries.get(parent));
 					}
 				}
@@ -113,12 +116,15 @@ public class SimpleRuntimeInference implements RuntimeInference {
 		if (types.contains(c)) {
 			return true;
 		}
+		StringBuilder typeDebug = new StringBuilder(); 
 		for (OWLClass type : types) {
 			if (map.getEntry(type).isSubtype(c)) {
 				return true;
 			}
+			typeDebug.append(type.getIRI()+", ");
 		}
 		if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner canAs: "+c.toStringID()+" on "+i.toStringID());
+		LOGGER.warn("Individual: "+i.getIRI()+" has types: ["+typeDebug.toString()+"] but is not a: "+c.getIRI());
 		return false;
 	}
 
@@ -167,9 +173,12 @@ public class SimpleRuntimeInference implements RuntimeInference {
 	public Collection<OWLClass> getTypes(OWLNamedIndividual i) {
 		long time = System.currentTimeMillis();
 		Set<OWLClass> types = new HashSet<OWLClass>();
-		for (OWLClassExpression ce : i.getTypes(ontology.getImportsClosure())) {
-			if (!ce.isAnonymous()) {
+		for (OWLClassExpression ce : i.getTypes(manager.getOntologies())) {
+			try {
 				types.add(ce.asOWLClass());
+			} catch (OWLRuntimeException e) {
+				LOGGER.debug("Individual "+i.getIRI()+" class expression "+ce.toString());
+				//Anonymous types
 			}
 		}
 		if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner getTypes: "+i.toStringID());

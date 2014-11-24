@@ -19,7 +19,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class FactoryHelper {
 	
-	public static final Logger LOGGER = Logger.getLogger(ReasonerBasedInference.class);
+	public static final Logger LOGGER = Logger.getLogger(FactoryHelper.class);
 
 	private OWLOntology owlOntology;
 	private OWLOntologyManager manager;
