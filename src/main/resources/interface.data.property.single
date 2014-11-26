@@ -24,7 +24,7 @@
      * @param new${OwlProperty} the ${owlProperty} property value to be added
      */
     //void add${OwlProperty}(${propertyRange} new${OwlProperty});
-	void add${OwlProperty}(Object new${OwlProperty});
+	void set${OwlProperty}(Object new${OwlProperty});
 
 
     /**
@@ -33,6 +33,6 @@
      * @param old${OwlProperty} the ${owlProperty} property value to be removed.
      */
     //void remove${OwlProperty}(${propertyRange} old${OwlProperty});
-	void remove${OwlProperty}(Object old${OwlProperty});
+	//void remove${OwlProperty}(Object old${OwlProperty});
 
 

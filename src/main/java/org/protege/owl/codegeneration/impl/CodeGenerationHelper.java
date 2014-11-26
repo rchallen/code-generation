@@ -51,6 +51,13 @@ public class CodeGenerationHelper {
         }
     }
  
+    public void setPropertyValue(OWLNamedIndividual i, OWLObjectProperty p, WrappedIndividual j, OWLObjectProperty ep) {
+    	for (OWLNamedIndividual existing : inference.getPropertyValues(i, p)) {
+            removePropertyValue(i,p,existing,ep);
+        }
+    	if (j != null) addPropertyValue(i,p,j,ep);
+    }
+    
     public void addPropertyValue(OWLNamedIndividual i, OWLObjectProperty p, WrappedIndividual j, OWLObjectProperty ep) {
     	OWLAxiom axiom = owlDataFactory.getOWLObjectPropertyAssertionAxiom(p, i, j.getOwlIndividual());
     	manager.addAxiom(owlOntology, axiom);
@@ -62,12 +69,16 @@ public class CodeGenerationHelper {
     }
     
     public void removePropertyValue(OWLNamedIndividual i, OWLObjectProperty p, WrappedIndividual j, OWLObjectProperty ep) {
-    	OWLAxiom axiom = owlDataFactory.getOWLObjectPropertyAssertionAxiom(p, i, j.getOwlIndividual());
+    	removePropertyValue(i,p,j.getOwlIndividual(),ep);
+    }
+    
+    public void removePropertyValue(OWLNamedIndividual i, OWLObjectProperty p, OWLNamedIndividual j, OWLObjectProperty ep) {
+    	OWLAxiom axiom = owlDataFactory.getOWLObjectPropertyAssertionAxiom(p, i, j);
     	for (OWLOntology imported : owlOntology.getImportsClosure()) {
         	manager.removeAxiom(imported, axiom);
     	}
     	if (ep != null) {
-    		OWLAxiom axiom2 = owlDataFactory.getOWLObjectPropertyAssertionAxiom(ep, j.getOwlIndividual(), i);
+    		OWLAxiom axiom2 = owlDataFactory.getOWLObjectPropertyAssertionAxiom(ep, j, i);
         	for (OWLOntology imported : owlOntology.getImportsClosure()) {
             	manager.removeAxiom(imported, axiom2);
         	}   
@@ -82,6 +93,13 @@ public class CodeGenerationHelper {
         return results;
     }
     
+    public void setPropertyValue(OWLNamedIndividual i, OWLDataProperty p, Object o) {
+    	for (OWLLiteral l : inference.getPropertyValues(i, p)) {
+            removePropertyValue(i,p,l);
+        }
+    	if (o != null) addPropertyValue(i,p,o);
+    }
+    
     public void addPropertyValue(OWLNamedIndividual i, OWLDataProperty p, Object o) {
     	OWLLiteral literal = getLiteralFromObject(owlDataFactory, o);
     	if (literal != null) {
@@ -92,16 +110,19 @@ public class CodeGenerationHelper {
     		throw new CodeGenerationRuntimeException("Invalid type for property value object " + o);
     	}
     }
-
+    
     public void removePropertyValue(OWLNamedIndividual i, OWLDataProperty p, Object o) {
     	OWLLiteral literal = getLiteralFromObject(owlDataFactory, o);
     	if (literal != null) {
-    		OWLAxiom axiom = owlDataFactory.getOWLDataPropertyAssertionAxiom(p, i, literal);
-    		manager.removeAxiom(owlOntology, axiom);
+    		removePropertyValue(i,p,literal);
+    	} else {
+    		throw new CodeGenerationRuntimeException("Invalid type for property value object " + literal.toString());
     	}
-    	else {
-    		throw new CodeGenerationRuntimeException("Invalid type for property value object " + o);
-    	}
+    }
+
+    public void removePropertyValue(OWLNamedIndividual i, OWLDataProperty p, OWLLiteral literal) {
+    	OWLAxiom axiom = owlDataFactory.getOWLDataPropertyAssertionAxiom(p, i, literal);
+    	manager.removeAxiom(owlOntology, axiom);
     }
     
     public static Object getObjectFromLiteral(OWLLiteral literal) {
