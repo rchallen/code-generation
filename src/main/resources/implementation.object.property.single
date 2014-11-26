@@ -23,10 +23,3 @@
                                        ${VocabInverse});
     }
 
-    /*public void remove${OwlProperty}(${propertyRange} old${OwlProperty}) {
-        getDelegate().removePropertyValue(getOwlIndividual(),
-                                          ${VocabProperty},
-                                          old${OwlProperty},
-                                          ${VocabInverse});
-    }*/
-

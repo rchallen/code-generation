@@ -14,12 +14,8 @@
 		return !(get${OwlProperty}()==null);
     }
 
-	//public void add${OwlProperty}(${propertyRange} new${OwlProperty}) {
 	public void set${OwlProperty}(Object new${OwlProperty}) {
 	    getDelegate().setPropertyValue(getOwlIndividual(), ${VocabProperty}, new${OwlProperty});
     }
 
-	/*public void remove${OwlProperty}(${propertyRange} old${OwlProperty}) {
-    public void remove${OwlProperty}(Object old${OwlProperty}) {
-		getDelegate().removePropertyValue(getOwlIndividual(), ${VocabProperty}, old${OwlProperty});
-    }*/
+	
