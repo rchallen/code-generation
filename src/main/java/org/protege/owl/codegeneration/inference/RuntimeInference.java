@@ -21,5 +21,5 @@ public interface RuntimeInference {
 
 	Collection<OWLNamedIndividual> getIndividuals(OWLClass owlClass);
 	
-	Collection<OWLClass> getTypes(OWLNamedIndividual owlClass);
+	Collection<OWLClass> getTypes(OWLNamedIndividual i);
 }
