@@ -20,6 +20,7 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLRuntimeException;
+import org.semanticweb.owlapi.search.EntitySearcher;
 
 public class SimpleRuntimeInference implements RuntimeInference {
 
@@ -133,7 +134,7 @@ public class SimpleRuntimeInference implements RuntimeInference {
 		long time = System.currentTimeMillis();
 		Collection<OWLNamedIndividual> results = new HashSet<OWLNamedIndividual>();
 		for (OWLOntology imported : ontology.getImportsClosure()) {
-			for (OWLIndividual j : i.getObjectPropertyValues(p, imported)) {
+			for (OWLIndividual j : EntitySearcher.getObjectPropertyValues( i,p, imported)) {
 				if (!j.isAnonymous()) {
 					results.add(j.asOWLNamedIndividual());
 				}
@@ -148,7 +149,7 @@ public class SimpleRuntimeInference implements RuntimeInference {
 		long time = System.currentTimeMillis();
 		Set<OWLLiteral> results = new HashSet<OWLLiteral>();
 		for (OWLOntology imported : ontology.getImportsClosure()) {
-			results.addAll(i.getDataPropertyValues(p, imported));
+			results.addAll(EntitySearcher.getDataPropertyValues(i,p, imported));
 		}
 		if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner getDataPropertyValues: "+p.toStringID()+" on "+i.toStringID());
 		return results;
@@ -159,7 +160,7 @@ public class SimpleRuntimeInference implements RuntimeInference {
 		long time = System.currentTimeMillis();
 		Set<OWLNamedIndividual> individuals = new HashSet<OWLNamedIndividual>();
 		for (OWLClass subtype: map.getEntry(owlClass).getSubtypes()) {
-			for (OWLIndividual i : subtype.getIndividuals(ontology.getImportsClosure())) {
+			for (OWLIndividual i : EntitySearcher.getIndividuals(subtype,ontology.getImportsClosure())) {
 				if (!i.isAnonymous()) {
 					individuals.add(i.asOWLNamedIndividual());
 				}
@@ -173,7 +174,7 @@ public class SimpleRuntimeInference implements RuntimeInference {
 	public Collection<OWLClass> getTypes(OWLNamedIndividual i) {
 		long time = System.currentTimeMillis();
 		Set<OWLClass> types = new HashSet<OWLClass>();
-		for (OWLClassExpression ce : i.getTypes(manager.getOntologies())) {
+		for (OWLClassExpression ce : EntitySearcher.getTypes(i,manager.getOntologies())) {
 			try {
 				types.add(ce.asOWLClass());
 			} catch (OWLRuntimeException e) {
@@ -191,7 +192,7 @@ public class SimpleRuntimeInference implements RuntimeInference {
 	private static Collection<OWLClass> getSuperClasses(OWLClass owlClass, OWLOntologyManager manager) {
 		Set<OWLClass> superClasses = new HashSet<OWLClass>();
 		for (OWLOntology ontology: manager.getOntologies()) {
-			for (OWLClassExpression ce : owlClass.getSuperClasses(ontology.getImportsClosure())) {
+			for (OWLClassExpression ce : EntitySearcher.getSuperClasses(owlClass, ontology.getImportsClosure())) {
 				if (!ce.isAnonymous()) {
 					superClasses.add(ce.asOWLClass());
 				}
@@ -199,7 +200,7 @@ public class SimpleRuntimeInference implements RuntimeInference {
 					superClasses.addAll(getNamedConjuncts((OWLObjectIntersectionOf) ce, ontology));
 				}
 			}
-			for (OWLClassExpression ce : owlClass.getEquivalentClasses(ontology.getImportsClosure())) {
+			for (OWLClassExpression ce : EntitySearcher.getEquivalentClasses(owlClass, ontology.getImportsClosure())) {
 				if (ce instanceof OWLObjectIntersectionOf) {
 					superClasses.addAll(getNamedConjuncts((OWLObjectIntersectionOf) ce, ontology));
 				}

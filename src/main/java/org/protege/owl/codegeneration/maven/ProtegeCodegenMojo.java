@@ -15,13 +15,14 @@ import org.protege.owl.codegeneration.DefaultWorker;
 import org.protege.owl.codegeneration.inference.CodeGenerationInference;
 import org.protege.owl.codegeneration.inference.ReasonerBasedInference;
 import org.protege.owl.codegeneration.names.IriNames;
-import org.semanticweb.HermiT.Reasoner.ReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+
+import uk.ac.manchester.cs.jfact.JFactFactory;
 
 
 /**
@@ -147,7 +148,7 @@ extends AbstractMojo
 			OWLReasoner reasoner = rFactory.createNonBufferingReasoner(owlOntology);
 			inference = new ReasonerBasedInference(owlOntology, reasoner);
 		} else {
-			OWLReasonerFactory rFactory = new ReasonerFactory();
+			OWLReasonerFactory rFactory = new JFactFactory();
 			OWLReasoner reasoner = rFactory.createNonBufferingReasoner(owlOntology);
 			inference = new ReasonerBasedInference(owlOntology, reasoner);
 		}

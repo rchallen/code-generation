@@ -26,6 +26,7 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import org.semanticweb.owlapi.search.EntitySearcher;
 
 public class ReasonerBasedInference implements CodeGenerationInference {
 	public static final Logger LOGGER = Logger.getLogger(ReasonerBasedInference.class);
@@ -225,7 +226,7 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 		// the behavior of getDataPropertyValues is somewhat undefined
 		// so make sure that the asserted ones are included.
 		for (OWLOntology imported : ontology.getImportsClosure()) {
-			results.addAll(i.getDataPropertyValues(p, imported));
+			results.addAll(EntitySearcher.getDataPropertyValues(i,p, imported));
 		}
 		if (System.currentTimeMillis()-time>10) LOGGER.debug("REASN: "+(System.currentTimeMillis()-time)+" ms for reasoner getDataProperty: "+p.toStringID()+" on "+i.toStringID());
 		return results;

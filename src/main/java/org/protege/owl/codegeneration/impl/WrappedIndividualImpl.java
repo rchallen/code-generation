@@ -1,5 +1,6 @@
 package org.protege.owl.codegeneration.impl;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,9 +23,12 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.OWLEntityRemover;
 import org.semanticweb.owlapi.util.ShortFormProvider;
 import org.semanticweb.owlapi.util.SimpleShortFormProvider;
+
+import com.google.common.collect.Multimap;
 
 /**
  * @author z.khan
@@ -79,8 +83,7 @@ public class WrappedIndividualImpl implements WrappedIndividual {
      * Deletes the individual from Ontology 
      */
     public void delete() {
-        OWLEntityRemover remover = new OWLEntityRemover(getOwlOntology().getOWLOntologyManager(), Collections
-                .singleton(getOwlOntology()));
+        OWLEntityRemover remover = new OWLEntityRemover(getOwlOntology().getOWLOntologyManager().getOntologies());
         owlIndividual.accept(remover);
         getOwlOntology().getOWLOntologyManager().applyChanges(remover.getChanges());
     }
@@ -119,7 +122,7 @@ public class WrappedIndividualImpl implements WrappedIndividual {
     
     private void printTypes(StringBuffer sb, ShortFormProvider provider) {
         Set<OWLClass> types = new TreeSet<OWLClass>();
-        for (OWLClassExpression ce : owlIndividual.getTypes(owlOntology)) {
+        for (OWLClassExpression ce : EntitySearcher.getTypes(owlIndividual,owlOntology)) {
             if (!ce.isAnonymous()) {
                 types.add(ce.asOWLClass());
             }
@@ -146,16 +149,15 @@ public class WrappedIndividualImpl implements WrappedIndividual {
     }
     
     private void printObjectPropertyValues(StringBuffer sb, ShortFormProvider provider) {
-        Map<OWLObjectPropertyExpression, Set<OWLIndividual>> valueMap = new TreeMap<OWLObjectPropertyExpression, Set<OWLIndividual>>(owlIndividual.getObjectPropertyValues(owlOntology));
-        for (Entry<OWLObjectPropertyExpression, Set<OWLIndividual>> entry : valueMap.entrySet()) {
+        Multimap<OWLObjectPropertyExpression, OWLIndividual> valueMap = EntitySearcher.getObjectPropertyValues(owlIndividual,owlOntology);
+        for (Entry<OWLObjectPropertyExpression, Collection<OWLIndividual>> entry : valueMap.asMap().entrySet()) {
             OWLObjectPropertyExpression pe = entry.getKey();
-            Set<OWLIndividual> values = entry.getValue();
             if (!pe.isAnonymous()) {
                 OWLObjectProperty property = pe.asOWLObjectProperty();
                 sb.append(provider.getShortForm(property));
                 sb.append(": ");
                 boolean firstTime = true;
-                for (OWLIndividual value : values) {
+                for (OWLIndividual value : entry.getValue()) {
                     if (!value.isAnonymous()) {
                         if (firstTime) {
                             firstTime = false;
@@ -172,10 +174,10 @@ public class WrappedIndividualImpl implements WrappedIndividual {
     }
 
     private void printDataPropertyValues(StringBuffer sb, ShortFormProvider provider) {
-        Map<OWLDataPropertyExpression, Set<OWLLiteral>> valueMap = new TreeMap<OWLDataPropertyExpression, Set<OWLLiteral>>(owlIndividual.getDataPropertyValues(owlOntology));
-        for (Entry<OWLDataPropertyExpression, Set<OWLLiteral>> entry : valueMap.entrySet()) {
+        Multimap<OWLDataPropertyExpression, OWLLiteral> valueMap = EntitySearcher.getDataPropertyValues(owlIndividual,owlOntology);
+        for (Entry<OWLDataPropertyExpression, Collection<OWLLiteral>> entry : valueMap.asMap().entrySet()) {
             OWLDataProperty property = entry.getKey().asOWLDataProperty();
-            Set<OWLLiteral> values = entry.getValue();
+            Collection<OWLLiteral> values = entry.getValue();
             sb.append(provider.getShortForm(property));
             sb.append(": ");
             boolean firstTime = true;

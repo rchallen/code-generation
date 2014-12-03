@@ -8,7 +8,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.FileDocumentSource;
 import org.semanticweb.owlapi.model.IRI;
@@ -19,6 +18,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.util.InferredOntologyGenerator;
 import org.semanticweb.owlapi.util.OWLOntologyMerger;
+
+import uk.ac.manchester.cs.jfact.JFactFactory;
 
 @Mojo( name = "owl-inferencing", defaultPhase = LifecyclePhase.GENERATE_RESOURCES )
 public class InferencingMojo extends AbstractMojo {
@@ -67,7 +68,7 @@ public class InferencingMojo extends AbstractMojo {
 					new FileDocumentSource(inputOntologyFile),config);
 			
 
-			OWLReasoner r = new Reasoner.ReasonerFactory().createNonBufferingReasoner(schema);
+			OWLReasoner r = new JFactFactory().createNonBufferingReasoner(schema);
 
 			InferredOntologyGenerator inference = new InferredOntologyGenerator(r);
 			//inference.addGenerator(new InferredClassAssertionAxiomGenerator());
@@ -82,7 +83,7 @@ public class InferencingMojo extends AbstractMojo {
 			//inference.addGenerator(new InferredSubClassAxiomGenerator());
 			//inference.addGenerator(new InferredSubDataPropertyAxiomGenerator());
 			//inference.addGenerator(new InferredSubObjectPropertyAxiomGenerator());
-			inference.fillOntology(manager, schema);
+			inference.fillOntology(manager.getOWLDataFactory(), schema);
 			outputOntologyFile.getParentFile().mkdirs();
 			if (merge) {
 				OWLOntologyMerger merger = new OWLOntologyMerger(manager);

@@ -28,6 +28,7 @@ import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLRuntimeException;
+import org.semanticweb.owlapi.search.EntitySearcher;
 
 public class DefaultWorker implements Worker {
 	private HashMap<String, String> templateMap = new HashMap<String, String>();
@@ -214,7 +215,7 @@ public class DefaultWorker implements Worker {
 		if (owlProperty instanceof OWLObjectProperty) {
 			nullable = inference.isNullable(owlClass, (OWLObjectProperty) owlProperty);
 			singleton = inference.isSingleton(owlClass, (OWLObjectProperty) owlProperty);
-			transitive = owlProperty.asOWLObjectProperty().isTransitive(owlOntology);
+			transitive = EntitySearcher.isTransitive(owlProperty.asOWLObjectProperty(),owlOntology.getImportsClosure());
 		} else {
 			nullable = inference.isNullable(owlClass, (OWLDataProperty) owlProperty);
 			singleton = inference.isSingleton(owlClass, (OWLDataProperty) owlProperty);
@@ -361,7 +362,7 @@ public class DefaultWorker implements Worker {
 	
 	private String getJavadoc(OWLEntity e) {
 	    StringBuffer sb = new StringBuffer();
-	    Set<OWLAnnotation> annotations = e.getAnnotations(owlOntology, Constants.JAVADOC);
+	    Collection<OWLAnnotation> annotations = EntitySearcher.getAnnotations(e, owlOntology, Constants.JAVADOC);
 	    if (annotations.size() == 1) {
 	        OWLAnnotation javadocAnnotation = annotations.iterator().next();
 	        if (javadocAnnotation.getValue() instanceof OWLLiteral) {

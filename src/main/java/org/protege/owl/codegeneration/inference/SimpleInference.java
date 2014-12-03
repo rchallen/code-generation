@@ -32,6 +32,7 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.search.EntitySearcher;
 
 public class SimpleInference implements CodeGenerationInference {
 	private OWLOntology ontology;
@@ -75,7 +76,7 @@ public class SimpleInference implements CodeGenerationInference {
 		}
 		else {
 			Set<OWLClass> subClasses = new TreeSet<OWLClass>();
-			for (OWLClassExpression ce : owlClass.getSubClasses(ontology)) {
+			for (OWLClassExpression ce : EntitySearcher.getSubClasses(owlClass, ontology.getImportsClosure())) {
 				if (!ce.isAnonymous()) {
 					subClasses.add(ce.asOWLClass());
 				}
@@ -90,7 +91,7 @@ public class SimpleInference implements CodeGenerationInference {
 	
 	public Collection<OWLClass> getSuperClasses(OWLClass owlClass) {
 		Set<OWLClass> superClasses = new HashSet<OWLClass>();
-		for (OWLClassExpression ce : owlClass.getSuperClasses(ontology.getImportsClosure())) {
+		for (OWLClassExpression ce : EntitySearcher.getSuperClasses(owlClass, ontology.getImportsClosure())) {
 			if (!ce.isAnonymous()) {
 				superClasses.add(ce.asOWLClass());
 			}
@@ -98,7 +99,7 @@ public class SimpleInference implements CodeGenerationInference {
 			    superClasses.addAll(getNamedConjuncts((OWLObjectIntersectionOf) ce));
 			}
 		}
-		for (OWLClassExpression ce : owlClass.getEquivalentClasses(ontology.getImportsClosure())) {
+		for (OWLClassExpression ce : EntitySearcher.getEquivalentClasses(owlClass,ontology.getImportsClosure())) {
 		    if (ce instanceof OWLObjectIntersectionOf) {
                 superClasses.addAll(getNamedConjuncts((OWLObjectIntersectionOf) ce));
             }
@@ -121,7 +122,7 @@ public class SimpleInference implements CodeGenerationInference {
 	public Collection<OWLNamedIndividual> getPropertyValues(OWLNamedIndividual i, OWLObjectProperty p) {
 	    Collection<OWLNamedIndividual> results = new HashSet<OWLNamedIndividual>();
 	    for (OWLOntology imported : ontology.getImportsClosure()) {
-	        for (OWLIndividual j : i.getObjectPropertyValues(p, imported)) {
+	        for (OWLIndividual j : EntitySearcher.getObjectPropertyValues(i,p, imported)) {
 	            if (!j.isAnonymous()) {
 	                results.add(j.asOWLNamedIndividual());
 	            }
@@ -134,7 +135,7 @@ public class SimpleInference implements CodeGenerationInference {
 	public Collection<OWLLiteral> getPropertyValues(OWLNamedIndividual i, OWLDataProperty p) {
         Set<OWLLiteral> results = new HashSet<OWLLiteral>();
         for (OWLOntology imported : ontology.getImportsClosure()) {
-            results.addAll(i.getDataPropertyValues(p, imported));
+            results.addAll(EntitySearcher.getDataPropertyValues(i,p, imported));
         }
         return results;
 	}
@@ -182,7 +183,7 @@ public class SimpleInference implements CodeGenerationInference {
 	
 	public Collection<OWLNamedIndividual> getIndividuals(OWLClass owlClass) {
 		Set<OWLNamedIndividual> individuals = new HashSet<OWLNamedIndividual>();
-		for (OWLIndividual i : owlClass.getIndividuals(ontology)) {
+		for (OWLIndividual i : EntitySearcher.getIndividuals(owlClass, ontology.getImportsClosure())) {
 			if (!i.isAnonymous()) {
 				individuals.add(i.asOWLNamedIndividual());
 			}
@@ -205,7 +206,7 @@ public class SimpleInference implements CodeGenerationInference {
 	
 	public Collection<OWLClass> getTypes(OWLNamedIndividual i) {
 		Set<OWLClass> types = new HashSet<OWLClass>();
-		for (OWLClassExpression ce : i.getTypes(ontology.getImportsClosure())) {
+		for (OWLClassExpression ce : EntitySearcher.getTypes(i,ontology.getImportsClosure())) {
 			if (!ce.isAnonymous()) {
 				types.add(ce.asOWLClass());
 			}
@@ -221,13 +222,13 @@ public class SimpleInference implements CodeGenerationInference {
 		topLevelClasses = new TreeSet<OWLClass>();
 		for (OWLClass owlClass : ontology.getClassesInSignature()) {
 			boolean foundParent = false;
-			for (OWLClassExpression parent : owlClass.getSuperClasses(ontology)) {
+			for (OWLClassExpression parent : EntitySearcher.getSuperClasses(owlClass,ontology.getImportsClosure())) {
 				if (hasGoodDirectSuperClass(owlClass, parent)
 						|| searchForSuperclassesFromIntersection(owlClass, parent)) {
 					foundParent = true;
 				}
 			}
-			for (OWLClassExpression parent : owlClass.getEquivalentClasses(ontology)) {
+			for (OWLClassExpression parent : EntitySearcher.getEquivalentClasses(owlClass,ontology.getImportsClosure())) {
 				if (searchForSuperclassesFromIntersection(owlClass, parent)) {
 					foundParent = true;
 				}

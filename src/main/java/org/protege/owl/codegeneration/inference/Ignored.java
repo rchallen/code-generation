@@ -1,5 +1,6 @@
 package org.protege.owl.codegeneration.inference;
 
+import java.util.Collection;
 import java.util.Set;
 
 import org.protege.owl.codegeneration.Constants;
@@ -14,6 +15,7 @@ import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLSubAnnotationPropertyOfAxiom;
+import org.semanticweb.owlapi.search.EntitySearcher;
 
 public class Ignored implements OWLAnnotationObjectVisitor {
 	boolean ignore = false;
@@ -43,7 +45,7 @@ public class Ignored implements OWLAnnotationObjectVisitor {
 	
 	public static boolean ignore(OWLEntity en, OWLOntology ontology) {
 		Ignored visitor = new Ignored();
-		Set<OWLAnnotation> annotations = en.getAnnotations(ontology);
+		Collection<OWLAnnotation> annotations = EntitySearcher.getAnnotations(en,ontology);
 		for (OWLAnnotation anno : annotations) {
 			anno.accept(visitor);
 		}

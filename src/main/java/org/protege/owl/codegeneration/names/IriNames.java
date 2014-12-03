@@ -1,5 +1,6 @@
 package org.protege.owl.codegeneration.names;
 
+import java.util.Collection;
 import java.util.Set;
 
 import org.protege.owl.codegeneration.CodeGenerationOptions;
@@ -11,6 +12,7 @@ import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.ShortFormProvider;
 import org.semanticweb.owlapi.util.SimpleShortFormProvider;
 
@@ -67,7 +69,7 @@ public class IriNames extends AbstractCodeGenerationNames {
 	
 	private String getJavaname(OWLEntity e) {
 	    StringBuffer sb = new StringBuffer();
-	    Set<OWLAnnotation> annotations = e.getAnnotations(ontology, Constants.JAVANAME);
+	    Collection<OWLAnnotation> annotations = EntitySearcher.getAnnotations(e,ontology, Constants.JAVANAME);
 	    if (annotations.size() == 1) {
 	        OWLAnnotation javanameAnnotation = annotations.iterator().next();
 	        if (javanameAnnotation.getValue() instanceof OWLLiteral) {
