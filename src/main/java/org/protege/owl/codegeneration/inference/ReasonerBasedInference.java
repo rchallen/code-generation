@@ -26,6 +26,7 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 import org.semanticweb.owlapi.search.EntitySearcher;
 
 public class ReasonerBasedInference implements CodeGenerationInference {
@@ -56,7 +57,7 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 	public void preCompute() {
 		reasoner.precomputeInferences(
 				InferenceType.values());
-				//.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
+		//.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
 	}
 
 	@Override
@@ -298,7 +299,19 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 	public boolean isSingleton(OWLClass owlClass, OWLObjectProperty p) {
 		OWLClassExpression intersection = factory
 				.getOWLObjectIntersectionOf(owlClass, factory.getOWLObjectMinCardinality(2, p));
-		return !reasoner.isSatisfiable(intersection);
+		try {
+			return !reasoner.isSatisfiable(intersection);
+			/* TODO:
+			 * This try catch block is unnecessary for Pellet or Hermit
+			 * The issue in JFact occurs when it looks at the hasIngredient / isIngredientOf properties
+			 * in the pizza ontology, and JFact throws the internal exception with the message
+			 * "Non simple role used as simple:" 
+			 */
+		} catch (ReasonerInternalException e) {
+			LOGGER.warn("Reasoner unhappy with maximum cardinality test: "+e);
+			return false;
+		}
+		
 	}
 
 	@Override
@@ -308,5 +321,5 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 		return !reasoner.isSatisfiable(intersection);
 	}
 
-	
+
 }

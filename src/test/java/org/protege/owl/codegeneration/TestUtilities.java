@@ -24,6 +24,8 @@ import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.testng.Assert;
 
+import uk.ac.manchester.cs.jfact.JFactFactory;
+
 public class TestUtilities {
 	
 	public static String NS01="http://protege.org/ontologies/CodeGeneration001.owl";
@@ -79,8 +81,9 @@ public class TestUtilities {
 		
 		CodeGenerationInference inference;
 		if (useInference) {
-			OWLReasonerFactory rFactory = (OWLReasonerFactory) Class.forName("org.semanticweb.HermiT.Reasoner$ReasonerFactory").newInstance();
+			// OWLReasonerFactory rFactory = (OWLReasonerFactory) Class.forName("org.semanticweb.HermiT.Reasoner$ReasonerFactory").newInstance();
 			// OWLReasonerFactory rFactory = (OWLReasonerFactory) Class.forName("com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory").newInstance();
+			OWLReasonerFactory rFactory = new JFactFactory();
 			OWLReasoner reasoner = rFactory.createReasoner(ontology);
 			inference = new ReasonerBasedInference(ontology, reasoner);
 		}
