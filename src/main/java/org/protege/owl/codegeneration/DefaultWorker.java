@@ -57,6 +57,7 @@ public class DefaultWorker implements Worker {
 		this.options = options;
 		this.names = names;
 		this.inference = inference;
+		this.inference.preCompute();
 		propertyDeclarations = new JavaPropertyDeclarationCache(inference, names);
 	}
 

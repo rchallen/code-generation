@@ -54,7 +54,9 @@ public class ReasonerBasedInference implements CodeGenerationInference {
 
 	@Override
 	public void preCompute() {
-		reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
+		reasoner.precomputeInferences(
+				InferenceType.values());
+				//.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
 	}
 
 	@Override

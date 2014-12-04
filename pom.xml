@@ -66,7 +66,7 @@
 			<version>1.2</version>
 		</dependency>
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>edu.stanford.protege</groupId>
 			<artifactId>org.protege.common</artifactId>
 			<version>4.3.0</version>
@@ -88,6 +88,13 @@
 					<groupId>net.sourceforge.owlapi</groupId>
 				</exclusion>
 			</exclusions>
+		</dependency>-->
+		
+		<dependency>
+			<groupId>edu.stanford.protege</groupId>
+			<artifactId>org.protege.editor.owl</artifactId>
+			<version>5.0.0-beta-15</version>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
@@ -115,6 +122,12 @@
 			<version>1.1.0.Final</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>6.8</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
