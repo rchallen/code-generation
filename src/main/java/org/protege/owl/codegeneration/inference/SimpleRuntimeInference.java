@@ -176,7 +176,7 @@ public class SimpleRuntimeInference implements RuntimeInference {
 		Set<OWLClass> types = new HashSet<OWLClass>();
 		for (OWLClassExpression ce : EntitySearcher.getTypes(i,manager.getOntologies())) {
 			try {
-				types.add(ce.asOWLClass());
+				if (!ce.isAnonymous()) { types.add(ce.asOWLClass());}
 			} catch (OWLRuntimeException e) {
 				LOGGER.debug("Individual "+i.getIRI()+" class expression "+ce.toString());
 				//Anonymous types
@@ -207,6 +207,7 @@ public class SimpleRuntimeInference implements RuntimeInference {
 			}
 		}
 		superClasses.remove(manager.getOWLDataFactory().getOWLThing());
+		superClasses.remove(owlClass);
 		return superClasses;
 	}
 
